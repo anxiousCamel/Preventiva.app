@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preventiva</title>
+    <link rel="stylesheet" href="css/preventiva.css">
+</head>
+<body>
+    <div class="container">
+        <form id="form">
+            <label for="loja">Loja:</label>
+            <select id="loja" required>
+                <option value="rebouças">Rebouças</option>
+                <option value="ivo">Ivo</option>
+                <option value="bom_retiro">Bom Retiro</option>
+                <option value="hortolandia">Hortolândia</option>
+                <option value="matao">Matão</option>
+                <option value="maria_antonia">Maria Antonia</option>
+                <option value="monte_mor">Monte Mor</option>
+                <option value="indaiatuba">Indaiatuba</option>
+                <option value="mogi_mirim">Mogi Mirim</option>
+                <option value="sousas">Sousas</option>
+                <option value="taquaral">Taquaral</option>
+                <option value="mogi_guacu">Mogi Guaçu</option>
+                <option value="bordon">Bordon</option>
+            </select>
+            
+            <label for="tipo">Tipo de Equipamento:</label>
+            <select id="tipo" required>
+                <option value="balanca_setor">Balança setor</option>
+                <option value="balanca_checkout">Balança checkout</option>
+                <option value="impressora">Impressora</option>
+                <option value="teclado">Teclado</option>
+                <option value="gabinete">Gabinete</option>
+                <option value="gaveta">Gaveta</option>
+                <option value="scanner">Scanner</option>
+            </select>
+            
+            <button type="submit">Iniciar a preventiva</button>
+        </form>
+    </div>
+
+    <ul id="equipamentosLista"></ul>
+
+    <script src="js/listarEquipamentos.js"></script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "lojas": {
+    "maria_antonia": {
+      "rotisseria": [
+        {
+          "id": 1743509486201,
+          "tipo": "balanca_setor",
+          "numero": "60",
+          "serie": "10653254",
+          "patrimonio": "4882"
+        },
+        {
+          "id": 1743509510255,
+          "tipo": "balanca_setor",
+          "numero": "65",
+          "serie": "002050",
+          "patrimonio": "21631"
+        }
+      ]
+    }
+  }
+}

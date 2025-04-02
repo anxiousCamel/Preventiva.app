@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro de Equipamentos</title>
+  <link rel="stylesheet" href="css/cadastroEquipamento.css">
+</head>
+<body>
+  <h1>Cadastro de Equipamentos</h1>
+  <form id="form">
+    <label for="loja">Loja:</label>
+    <select id="loja" required>
+      <option value="rebouças">Rebouças</option>
+      <option value="ivo">Ivo</option>
+      <option value="bom_retiro">Bom Retiro</option>
+      <option value="hortolandia">Hortolândia</option>
+      <option value="matao">Matão</option>
+      <option value="maria_antonia">Maria Antonia</option>
+      <option value="monte_mor">Monte Mor</option>
+      <option value="indaiatuba">Indaiatuba</option>
+      <option value="mogi_mirim">Mogi Mirim</option>
+      <option value="sousas">Sousas</option>
+      <option value="taquaral">Taquaral</option>
+      <option value="mogi_guacu">Mogi Guaçu</option>
+      <option value="bordon">Bordon</option>
+    </select>
+    
+    <label for="setor">Setor:</label>
+    <select id="setor" required>
+      <option value="açougue">Açougue</option>
+      <option value="padaria">Padaria</option>
+      <option value="frios">Frios e Laticínios</option>
+      <option value="hortifruti">Hortifruti</option>
+      <option value="rotisseria">Rotisseria</option>
+      <option value="peixaria">Peixaria</option>
+    </select>
+
+    <label for="tipo">Tipo de Equipamento:</label>
+    <select id="tipo" required>
+      <option value="balanca_setor">Balança setor</option>
+      <option value="balanca_checkout">Balança checkout</option>
+      <option value="impressora">Impressora</option>
+      <option value="teclado">Teclado</option>
+      <option value="gabinete">Gabinete</option>
+      <option value="gaveta">Gaveta</option>
+      <option value="scanner">Scanner</option>
+    </select>
+
+    <input type="number" id="numero_equipamento" placeholder="Número do equipamento" required>
+    <input type="text" id="serie" placeholder="Série" required>
+    <input type="text" id="patrimonio" placeholder="Patrimônio" required>
+    
+    <button type="submit">Cadastrar</button>
+  </form>
+
+  <ul id="lista"></ul>
+
+  <script src="js/cadastroEquipamento.js"></script>
+</body>
+</html>
