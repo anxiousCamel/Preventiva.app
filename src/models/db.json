@@ -3,18 +3,30 @@
     "maria_antonia": {
       "rotisseria": [
         {
-          "id": 1743509486201,
+          "id": 1744036793124,
+          "setor": "rotisseria",
           "tipo": "balanca_setor",
           "numero": "60",
           "serie": "10653254",
           "patrimonio": "4882"
         },
         {
-          "id": 1743509510255,
+          "id": 1744036848966,
+          "setor": "rotisseria",
           "tipo": "balanca_setor",
           "numero": "65",
           "serie": "002050",
           "patrimonio": "21631"
+        }
+      ],
+      "frios": [
+        {
+          "id": 1744036823633,
+          "setor": "frios",
+          "tipo": "balanca_setor",
+          "numero": "61",
+          "serie": "106535257",
+          "patrimonio": "5103"
         }
       ]
     }

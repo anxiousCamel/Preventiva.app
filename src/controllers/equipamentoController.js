@@ -37,17 +37,19 @@ export const listarEquipamentosPorLojaETipo = async (req, res) => {
   try {
     const { loja, tipo } = req.params;
 
-    // Acessa as lojas diretamente do JSON importado
+    // Verifica se a loja existe
     if (!db.lojas[loja]) {
       return res.status(404).json({ error: "Loja não encontrada!" });
     }
 
     let equipamentosEncontrados = [];
 
-    // Percorre os setores da loja para encontrar os equipamentos do tipo desejado
-    Object.values(db.lojas[loja]).forEach(setor => {
-      setor.forEach(equipamento => {
+    // Usa Object.entries para iterar com a chave do setor
+    Object.entries(db.lojas[loja]).forEach(([setorKey, equipamentosArray]) => {
+      equipamentosArray.forEach(equipamento => {
         if (equipamento.tipo === tipo) {
+          // Garante que o equipamento tenha o campo "setor" preenchido
+          equipamento.setor = setorKey;
           equipamentosEncontrados.push(equipamento);
         }
       });

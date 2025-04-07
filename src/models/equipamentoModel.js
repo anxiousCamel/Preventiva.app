@@ -41,6 +41,7 @@ async function addEquipamento(loja, setor, tipo, numero, serie, patrimonio) {
 
   const novoEquipamento = {
     id: Date.now(), // Gerar um ID único baseado no timestamp
+    setor,
     tipo,
     numero,
     serie,

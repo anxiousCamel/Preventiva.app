@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Preventiva - Carrossel de Balanças</title>
+    <style>
+      /* Estilos para o container do carrossel */
+      #carouselContainer {
+        display: flex;
+        overflow-x: scroll;
+        scroll-snap-type: x mandatory; /* Define o comportamento de snap */
+        -webkit-overflow-scrolling: touch; /* Suaviza a rolagem em dispositivos iOS */
+        gap: 10px;
+        padding: 10px;
+      }
+
+      /* Cada slide ocupa 100% da largura da viewport */
+      .slide {
+        flex: 0 0 100%;
+        scroll-snap-align: start;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 15px;
+        box-sizing: border-box;
+        background-color: #f9f9f9;
+      }
+
+      /* Estilos básicos para os formulários */
+      fieldset {
+        margin-bottom: 15px;
+        padding: 10px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 5px;
+      }
+
+      input[type="text"],
+      input[type="file"] {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+        box-sizing: border-box;
+      }
+
+      button {
+        padding: 10px 15px;
+        background-color: #007bff;
+        border: none;
+        color: #fff;
+        border-radius: 3px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Preventiva - Carrossel de Balanças</h1>
+
+    <!-- Container do carrossel -->
+    <div id="carouselContainer"></div>
+
+    <script>
+      // Recupera os dados dos equipamentos armazenados no sessionStorage
+      const equipamentosData = sessionStorage.getItem("equipamentosData");
+      const carouselContainer = document.getElementById("carouselContainer");
+
+      // Função para mostrar a pré-visualização da imagem
+      function previewImage(fileInput, previewImg) {
+        const file = fileInput.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            previewImg.src = e.target.result;
+            previewImg.style.display = "block"; // Exibe a imagem
+          };
+          reader.readAsDataURL(file);
+        } else {
+          previewImg.style.display = "none";
+        }
+      }
+
+      // Se os dados existirem, gera um slide (formulário) para cada equipamento
+      if (equipamentosData) {
+        const equipamentos = JSON.parse(equipamentosData);
+
+        equipamentos.forEach((equipamento, index) => {
+          // Cria o elemento "slide" que conterá o formulário
+          const slide = document.createElement("div");
+          slide.classList.add("slide");
+
+          // Cria o elemento form e define seus atributos
+          const form = document.createElement("form");
+          form.setAttribute("id", `preventiveForm_${index}`);
+          form.setAttribute("action", "/savePreventiva"); // Endpoint para salvar a preventiva
+          form.setAttribute("method", "post");
+          form.setAttribute("enctype", "multipart/form-data");
+
+          // Monta o conteúdo do formulário com os dados do equipamento, checklist e campos para fotos
+          form.innerHTML = `
+        <!-- Dados da Balança (preenchidos dinamicamente) -->
+        <fieldset>
+          <legend>Dados da Balança ${index + 1}</legend>
+          <div>
+            <label for="numero_${index}">Número da Balança:</label>
+            <input type="text" id="numero_${index}" name="numero" readonly value="${
+            equipamento.numero || ""
+          }">
+          </div>
+          <div>
+            <label for="setor_${index}">Setor da Balança:</label>
+            <input type="text" id="setor_${index}" name="setor" readonly value="${
+            equipamento.setor || ""
+          }">
+          </div>
+          <div>
+            <label for="serie_${index}">Série da Balança:</label>
+            <input type="text" id="serie_${index}" name="serie" readonly value="${
+            equipamento.serie || ""
+          }">
+          </div>
+          <div>
+            <label for="patrimonio_${index}">Patrimônio da Balança:</label>
+            <input type="text" id="patrimonio_${index}" name="patrimonio" readonly value="${
+            equipamento.patrimonio || ""
+          }">
+          </div>
+        </fieldset>
+
+        <!-- Checklist da Preventiva -->
+          <fieldset>
+            <legend>Checklist da Preventiva</legend>
+            <div>
+              <input type="checkbox" id="limparCabecote_${index}" name="checklist" value="limparCabecote">
+              <label for="limparCabecote_${index}">Limpar cabeçote</label>
+            </div>
+            <div>
+              <input type="checkbox" id="testeImpressao_${index}" name="checklist" value="testeImpressao">
+              <label for="testeImpressao_${index}">Teste de impressão</label>
+            </div>
+            <div>
+              <input type="checkbox" id="pesoBalança_${index}" name="checklist" value="pesoBalança">
+              <label for="pesoBalança_${index}">Peso da balança</label>
+            </div>
+            <div>
+              <input type="checkbox" id="teclado_${index}" name="checklist" value="teclado">
+              <label for="teclado_${index}">Teclado</label>
+            </div>
+            <div>
+              <input type="checkbox" id="display_${index}" name="checklist" value="display">
+              <label for="display_${index}">Display</label>
+            </div>
+            <div>
+              <input type="checkbox" id="nivelarBalança_${index}" name="checklist" value="nivelarBalança">
+              <label for="nivelarBalança_${index}">Nivelar balança</label>
+            </div>
+            <div>
+              <input type="checkbox" id="cabos_${index}" name="checklist" value="cabos">
+              <label for="cabos_${index}">Cabos</label>
+            </div>
+            <div>
+              <input type="checkbox" id="retirarAdesivo_${index}" name="checklist" value="retirarAdesivo">
+              <label for="retirarAdesivo_${index}">Retirar adesivo e outros</label>
+            </div>
+            <div>
+              <input type="checkbox" id="tampas_${index}" name="checklist" value="tampas">
+              <label for="tampas_${index}">Tampas</label>
+            </div>
+            <div>
+              <input type="checkbox" id="limpezaBalança_${index}" name="checklist" value="limpezaBalança">
+              <label for="limpezaBalança_${index}">Limpeza da balança</label>
+            </div>
+          </fieldset>
+
+        <!-- Fotos da Preventiva -->
+        <fieldset>
+          <legend>Fotos da Preventiva</legend>
+          <div>
+            <label for="fotoAntes_${index}">Foto antes da preventiva:</label>
+            <input type="file" id="fotoAntes_${index}" name="fotoAntes" accept="image/*" capture="environment">
+            <img id="previewFotoAntes_${index}" style="max-width:100%; display:none; margin-top:10px;" alt="Pré-visualização da foto antes">
+          </div>
+          <div>
+            <label for="fotoDepois_${index}">Foto depois da preventiva:</label>
+            <input type="file" id="fotoDepois_${index}" name="fotoDepois" accept="image/*" capture="environment">
+            <img id="previewFotoDepois_${index}" style="max-width:100%; display:none; margin-top:10px;" alt="Pré-visualização da foto depois">
+          </div>
+        </fieldset>
+
+        <fieldset>
+  <legend>Assinatura</legend>
+  <p>Use o dedo para assinar abaixo:</p>
+  <canvas id="signatureCanvas_${index}" width="300" height="150" style="border:1px solid #ccc;"></canvas>
+  <br>
+  <button type="button" onclick="clearSignature(${index})">Limpar Assinatura</button>
+  <input type="hidden" name="assinatura" id="assinaturaInput_${index}">
+</fieldset>
+
+
+        <button type="submit">Enviar Preventiva</button>
+      `;
+
+          // Adiciona o formulário dentro do slide e o slide no container do carrossel
+          slide.appendChild(form);
+          carouselContainer.appendChild(slide);
+
+          // Adiciona os event listeners para pré-visualização das fotos
+          const fotoAntesInput = form.querySelector(`#fotoAntes_${index}`);
+          const previewFotoAntes = form.querySelector(
+            `#previewFotoAntes_${index}`
+          );
+          fotoAntesInput.addEventListener("change", () => {
+            previewImage(fotoAntesInput, previewFotoAntes);
+          });
+
+          const fotoDepoisInput = form.querySelector(`#fotoDepois_${index}`);
+          const previewFotoDepois = form.querySelector(
+            `#previewFotoDepois_${index}`
+          );
+          fotoDepoisInput.addEventListener("change", () => {
+            previewImage(fotoDepoisInput, previewFotoDepois);
+          });
+        });
+      } else {
+        alert(
+          "Dados do equipamento não encontrados. Por favor, inicie a preventiva novamente."
+        );
+      }
+    </script>
+
+<script>
+    // Controla a assinatura
+    function enableSignatureCanvas(canvas, index) {
+      const ctx = canvas.getContext("2d");
+      let drawing = false;
+  
+      function startDraw(e) {
+        drawing = true;
+        ctx.beginPath();
+        ctx.moveTo(e.offsetX, e.offsetY);
+      }
+  
+      function draw(e) {
+        if (!drawing) return;
+        ctx.lineTo(e.offsetX, e.offsetY);
+        ctx.stroke();
+      }
+  
+      function stopDraw() {
+        drawing = false;
+      }
+  
+      // Suporte a toque no celular
+      canvas.addEventListener("touchstart", (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        ctx.beginPath();
+        ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+        drawing = true;
+      });
+  
+      canvas.addEventListener("touchmove", (e) => {
+        e.preventDefault(); // Evita rolagem da tela ao desenhar
+        if (!drawing) return;
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+        ctx.stroke();
+      });
+  
+      canvas.addEventListener("touchend", () => {
+        drawing = false;
+      });
+  
+      // Mouse (desktop)
+      canvas.addEventListener("mousedown", startDraw);
+      canvas.addEventListener("mousemove", draw);
+      canvas.addEventListener("mouseup", stopDraw);
+      canvas.addEventListener("mouseout", stopDraw);
+  
+      // Captura a assinatura ao enviar o formulário
+      const form = document.getElementById(`preventiveForm_${index}`);
+      form.addEventListener("submit", () => {
+        const dataURL = canvas.toDataURL(); // Salva imagem como base64
+        document.getElementById(`assinaturaInput_${index}`).value = dataURL;
+      });
+    }
+  
+    // Limpar assinatura
+    function clearSignature(index) {
+      const canvas = document.getElementById(`signatureCanvas_${index}`);
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  
+    // Ativa a função de desenho para todos os canvas
+    window.addEventListener("load", () => {
+      const totalSlides = document.querySelectorAll("canvas[id^='signatureCanvas_']").length;
+      for (let i = 0; i < totalSlides; i++) {
+        const canvas = document.getElementById(`signatureCanvas_${i}`);
+        if (canvas) enableSignatureCanvas(canvas, i);
+      }
+    });
+  </script>
+  
+  </body>
+</html>
