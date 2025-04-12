@@ -1,0 +1,51 @@
+body {
+    text-align: center;
+    background: url('https://phygital-files.mercafacil.com/good-bom/uploads/empresa/logo_prancheta_1_alice_vieira_9d55af00_d9ed_470f_a1c5_7ffc429a842f_441cc643-bcf2-4463-a392-8224d57e40aa.png')no-repeat bottom right;
+    background-size: 28%;
+    background-position: right 20px bottom 30px;
+    background-repeat: no-repeat;
+    height: 100%;
+    margin: 0px;
+    background-attachment: fixed;  
+}
+
+.title_box {
+    background-color: rgb(24, 101, 189);
+    padding: 8px;
+    font: 30pt Segoe UI;
+    font-weight: bolder;
+    margin-bottom: 30px;
+    border-bottom: double 7px rgb(255, 255, 255);
+    border-top: double 7px rgb(255, 255, 255);
+    color:white;
+    box-shadow: 0px 4px 8px rgba(142, 142, 184, 0.767);
+}
+
+.opt_button {
+    border-bottom: solid 1px rgb(204, 116, 0);
+    border-radius: 10px;
+    padding: 8px;
+    padding-top: 6px;
+    margin: auto;
+    max-width: 220px;
+    background-color: rgb(255, 145, 0);
+    color: white;
+    box-shadow: 4px 4px 8px rgba(142, 142, 184, 0.767);
+    font: 12pt Segoe UI;
+    font-weight: bold;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.button_link {
+    display: block;
+    padding: 6px;
+    padding-left: 20%;
+    padding-right: 20%;
+    color: black;
+    text-decoration: none;
+}
+
+.opt_button:hover {
+    border-bottom: solid 1px rgb(247, 154, 32);
+    background-color: rgb(255, 177, 74);
+}
