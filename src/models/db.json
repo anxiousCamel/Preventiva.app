@@ -29,6 +29,26 @@
           "patrimonio": "5103"
         }
       ]
+    },
+    "mogi_guacu": {
+      "padaria": [
+        {
+          "id": 1744476119693,
+          "setor": "padaria",
+          "tipo": "balanca_setor",
+          "numero": "07",
+          "serie": "1444",
+          "patrimonio": "19167"
+        },
+        {
+          "id": 1744476326759,
+          "setor": "padaria",
+          "tipo": "balanca_setor",
+          "numero": "09",
+          "serie": "1451",
+          "patrimonio": "19175"
+        }
+      ]
     }
   }
 }
