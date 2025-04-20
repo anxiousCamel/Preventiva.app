@@ -303,213 +303,188 @@
       });
     </script>
 
-    <script>
-      /**
-       * Função auxiliar para converter um arquivo em base64.
-       * @param {File} file - Arquivo a ser convertido.
-       * @returns {Promise<string>} - Retorna uma promise com a string base64.
-       */
-      function fileToBase64(file) {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.onerror = (error) => reject(error);
-          reader.readAsDataURL(file);
-        });
+<script>
+  /**
+   * Converte um File em string Base64
+   * @param {File} file
+   * @returns {Promise<string>}
+   */
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  /**
+   * Gera o PDF preenchido com N preventivas, 2 por página.
+   */
+  async function generateFilledPDF() {
+    const { PDFDocument } = PDFLib;
+
+    // 1) Carrega template
+    const templateUrl   = "CHEK LIST PREVENTIVA BALANÇAS.pdf";
+    const templateBytes = await fetch(templateUrl).then(res => res.arrayBuffer());
+    const pdfDoc        = await PDFDocument.load(templateBytes);
+
+    // 2) Quantidade de equipamentos disponíveis no HTML
+    const equipmentCount = document.querySelectorAll("form[id^='preventiveForm_']").length;
+    const perPage        = 2;                     // 2 preventivas por página
+    const pageCount      = Math.ceil(equipmentCount / perPage);
+    const deltaX         = 250;                   // deslocamento horizontal entre slots (ajuste conforme PDF)
+
+    // 3) Prepara array de páginas: a primeira já existe
+    const pages   = pdfDoc.getPages();
+    const basePage = pages[0];
+    // clona quantas páginas faltam
+    for (let p = 1; p < pageCount; p++) {
+      const [cloned] = await pdfDoc.copyPages(pdfDoc, [0]);
+      pdfDoc.addPage(cloned);
+    }
+
+    // 4) Funções auxiliares --------------------------------------------------
+
+    /**
+     * Preenche um campo de texto interativo (apenas no slot 0)
+     * @param {string} selector   Seletor do input HTML
+     * @param {string} fieldName  Nome do campo no PDF
+     */
+    function fillTextField(selector, fieldName) {
+      const el = document.querySelector(selector);
+      if (el) pdfDoc.getForm().getTextField(fieldName).setText(el.value || "");
+    }
+
+    /**
+     * Verifica e marca/desmarca um checkbox interativo (apenas slot 0)
+     * @param {string} selector
+     * @param {string} boxName
+     */
+    function fillCheckbox(selector, boxName) {
+      const el = document.querySelector(selector);
+      const chk = pdfDoc.getForm().getCheckBox(boxName);
+      if (el && chk) {
+        el.checked ? chk.check() : chk.uncheck();
       }
-      /**
-       * Função para gerar o PDF preenchido com os dados do formulário e imagens.
-       */
-      async function generateFilledPDF() {
-        const { PDFDocument, StandardFonts } = PDFLib;
+    }
 
-        // Carrega o template do PDF com fields interativos
-        const templateUrl = "CHEK LIST PREVENTIVA BALANÇAS ASSINATURA (1).pdf";
-        const templateBytes = await fetch(templateUrl).then((res) =>
-          res.arrayBuffer()
-        );
-        const pdfDoc = await PDFDocument.load(templateBytes);
-
-        // Obtém o formulário interativo do PDF
-        const form = pdfDoc.getForm();
-
-        // Preenche os campos de texto com os dados do primeiro formulário (exemplo)
-        const numero = document.querySelector("#numero_0").value;
-        const setor = document.querySelector("#setor_0").value;
-        const serie = document.querySelector("#serie_0").value;
-        const patrimonio = document.querySelector("#patrimonio_0").value;
-
-        form.getTextField("equipment_number").setText(numero);
-        form.getTextField("equipment_sector").setText(setor);
-        form.getTextField("equipment_serial").setText(serie);
-        form.getTextField("equipment_patrimonio").setText(patrimonio);
-
-        // Preenche os checkboxes (exemplo para o checkbox "limparCabecote")
-        const limparCabecote =
-          document.querySelector("#limparCabecote_0").checked;
-        if (limparCabecote) {
-          form.getCheckBox("checkbox_limparCabecote").check();
-        } else {
-          form.getCheckBox("checkbox_limparCabecote").uncheck();
-        }
-        // Repetir para os demais checkboxes conforme necessário
-
-        // Converte os arquivos de imagem para base64, se existirem
-        const fotoAntesInput = document.querySelector("#fotoAntes_0");
-        const fotoDepoisInput = document.querySelector("#fotoDepois_0");
-
-        let fotoAntesBase64, fotoDepoisBase64;
-        if (fotoAntesInput && fotoAntesInput.files[0]) {
-          console.log("Tipo da imagem antes:", fotoAntesInput.files[0].type);
-          fotoAntesBase64 = await fileToBase64(fotoAntesInput.files[0]);
-        }
-        if (fotoDepoisInput && fotoDepoisInput.files[0]) {
-          console.log("Tipo da imagem depois:", fotoDepoisInput.files[0].type);
-          fotoDepoisBase64 = await fileToBase64(fotoDepoisInput.files[0]);
-        }
-
-        // Seleciona a primeira página do PDF para desenhar as imagens
-        const pages = pdfDoc.getPages();
-        const firstPage = pages[0];
-
-        /**
-         * Função auxiliar para desenhar uma imagem num campo do PDF.
-         * @param {string} fieldName - Nome do campo do PDF.
-         * @param {string} base64Image - Imagem em base64.
-         * @param {Object} defaultPos - Posição padrão caso não seja possível obter as coordenadas do campo.
-         */
-        async function drawImageInField(fieldName, base64Image, defaultPos) {
-          if (!base64Image) return;
-
-          // Remove o prefixo da string base64 (exemplo: "data:image/jpeg;base64,")
-          const parts = base64Image.split(",");
-          const prefix = parts[0];
-          const imageData = parts[1] || base64Image;
-
-          let embeddedImage;
-          try {
-            // Verifica o formato da imagem pelo prefixo e usa o método correto para embedar
-            if (prefix.includes("jpeg") || prefix.includes("jpg")) {
-              embeddedImage = await pdfDoc.embedJpg(imageData);
-            } else if (prefix.includes("png")) {
-              embeddedImage = await pdfDoc.embedPng(imageData);
-            } else {
-              // Se não identificar o formato, utiliza embedPng como padrão
-              embeddedImage = await pdfDoc.embedPng(imageData);
-            }
-
-            // Tenta obter a posição do campo a partir do widget (campo interativo do PDF)
-            let field;
-            try {
-              field = form.getTextField(fieldName);
-            } catch (e) {
-              console.error("Campo não encontrado: " + fieldName);
-              field = null;
-            }
-
-            let x, y, width, height;
-            if (
-              field &&
-              field.acroField &&
-              field.acroField.getWidgets().length > 0
-            ) {
-              const widget = field.acroField.getWidgets()[0];
-              const rect = widget.getRectangle();
-              x = rect.x;
-              y = rect.y;
-              width = rect.width;
-              height = rect.height;
-            } else {
-              // Usa posição padrão se não for possível identificar as coordenadas do campo
-              ({ x, y, width, height } = defaultPos);
-            }
-
-            // Desenha a imagem na primeira página do PDF
-            firstPage.drawImage(embeddedImage, { x, y, width, height });
-          } catch (error) {
-            console.error(
-              "Erro ao embedar imagem para o campo " + fieldName + ":",
-              error
-            );
-          }
-        }
-
-        // Exemplo: desenha a imagem "fotoAntes" no campo "before_cleaning"
-        await drawImageInField("before_cleaning", fotoAntesBase64, {
-          x: 50,
-          y: 400,
-          width: 200,
-          height: 150,
-        });
-        // Exemplo: desenha a imagem "fotoDepois" no campo "after_cleaning"
-        await drawImageInField("after_cleaning", fotoDepoisBase64, {
-          x: 300,
-          y: 400,
-          width: 200,
-          height: 150,
-        });
-
-        // Trata a assinatura (converte o conteúdo do canvas para base64 e embeda no PDF)
-        const canvasSignature = document.getElementById("signatureCanvas_0");
-        if (canvasSignature) {
-          const signatureDataURL = canvasSignature.toDataURL();
-          if (signatureDataURL && signatureDataURL !== "data:,") {
-            // Verifica se o canvas não está vazio
-            const signatureBase64 =
-              signatureDataURL.split(",")[1] || signatureDataURL;
-            try {
-              const signatureImage = await pdfDoc.embedPng(signatureBase64);
-              let signatureField;
-              try {
-                signatureField = form.getTextField("signatureTi");
-              } catch (e) {
-                console.error(
-                  "Campo signatureTi não encontrado, utilizando posição padrão."
-                );
-                signatureField = null;
-              }
-
-              let x, y, width, height;
-              if (
-                signatureField &&
-                signatureField.acroField &&
-                signatureField.acroField.getWidgets().length > 0
-              ) {
-                const widget = signatureField.acroField.getWidgets()[0];
-                const rect = widget.getRectangle();
-                x = rect.x;
-                y = rect.y;
-                width = rect.width;
-                height = rect.height;
-                // Ajuste o offset se necessário
-                const offsetY = 0;
-                y = y - offsetY;
-              } else {
-                // Valores padrão caso não seja possível obter as coordenadas
-                x = 50;
-                y = 200;
-                width = 150;
-                height = 50;
-              }
-              firstPage.drawImage(signatureImage, { x, y, width, height });
-            } catch (error) {
-              console.error(
-                "Erro ao adicionar a assinatura no campo signatureTi:",
-                error
-              );
-            }
-          }
-        }
-
-        // Salva o PDF preenchido e inicia o download
-        const pdfBytes = await pdfDoc.save();
-        const blob = new Blob([pdfBytes], { type: "application/pdf" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "preventivas_preenchidas.pdf";
-        a.click();
+    /**
+     * Desenha uma imagem binária em um slot específico.
+     * @param {PDFPage} page
+     * @param {string} fieldName  campo de referência no PDF (slot 0)
+     * @param {string|null} base64WithPrefix
+     * @param {{x:number,y:number,width:number,height:number}} defaultPos
+     * @param {number} slotIndex  0 ou 1 para posicionar
+     */
+    async function drawImageSlot(page, fieldName, base64WithPrefix, defaultPos, slotIndex) {
+      if (!base64WithPrefix) return;
+      const [prefix, data] = base64WithPrefix.split(",");
+      let embedded;
+      if (prefix.includes("jpeg") || prefix.includes("jpg")) {
+        embedded = await pdfDoc.embedJpg(data);
+      } else {
+        embedded = await pdfDoc.embedPng(data);
       }
-    </script>
+
+      // obtém coords do campo
+      let x, y, w, h;
+      try {
+        const field  = pdfDoc.getForm().getTextField(fieldName);
+        const widget = field.acroField.getWidgets()[0];
+        const rect   = widget.getRectangle();
+        ({ x, y, width: w, height: h } = rect);
+      } catch {
+        ({ x, y, width: w, height: h } = defaultPos);
+      }
+
+      // aplica deslocamento no X para slot 1
+      page.drawImage(embedded, {
+        x: x + slotIndex * deltaX,
+        y,
+        width:  w,
+        height: h
+      });
+    }
+
+    /**
+     * Desenha a assinatura no slot indicado.
+     * @param {PDFPage} page
+     * @param {string} base64Data  sem prefixo
+     * @param {number} slotIndex
+     */
+    async function drawSignatureSlot(page, base64Data, slotIndex) {
+      if (!base64Data) return;
+      const image = await pdfDoc.embedPng(base64Data);
+      // pega coords de signatureTi
+      let sx, sy, sw, sh;
+      try {
+        const field  = pdfDoc.getForm().getTextField("signatureTi");
+        const rect   = field.acroField.getWidgets()[0].getRectangle();
+        ({ x: sx, y: sy, width: sw, height: sh } = rect);
+      } catch {
+        sx = 50; sy = 200; sw = 150; sh = 50;
+      }
+      page.drawImage(image, {
+        x: sx + slotIndex * deltaX,
+        y: sy,
+        width:  sw,
+        height: sh
+      });
+    }
+
+    // 5) Loop principal: para cada equipamento, determine página e slot -----
+    for (let idx = 0; idx < equipmentCount; idx++) {
+      const pageIndex = Math.floor(idx / perPage);
+      const slotIndex = idx % perPage;
+      const pdfPage   = pdfDoc.getPages()[pageIndex];
+
+      // 5.1) Text fields (somente slot 0 é interativo — duplicamos valores)
+      if (slotIndex === 0) {
+        fillTextField(`#numero_${idx}`,      "equipment_number");
+        fillTextField(`#setor_${idx}`,       "equipment_sector");
+        fillTextField(`#serie_${idx}`,       "equipment_serial");
+        fillTextField(`#patrimonio_${idx}`,  "equipment_patrimonio");
+      }
+
+      // 5.2) Checkboxes (idem, só slot 0)
+      fillCheckbox(`#limparCabecote_${idx}`, "checkbox_limparCabecote");
+      // repita para os demais checkboxes...
+
+      // 5.3) Imagens “antes” e “depois”
+      const beforeInput = document.querySelector(`#fotoAntes_${idx}`);
+      const afterInput  = document.querySelector(`#fotoDepois_${idx}`);
+      const before64    = beforeInput?.files[0] ? await fileToBase64(beforeInput.files[0]) : null;
+      const after64     = afterInput?.files[0]  ? await fileToBase64(afterInput.files[0])  : null;
+
+      await drawImageSlot(pdfPage, "before_cleaning", before64, { x:50,  y:400, width:200, height:150 }, slotIndex);
+      await drawImageSlot(pdfPage, "after_cleaning",  after64,  { x:300, y:400, width:200, height:150 }, slotIndex);
+
+      // 5.4) Assinatura
+      const canvas = document.getElementById(`signatureCanvas_${idx}`);
+      let sigData = null;
+      if (canvas) {
+        const dataURL = canvas.toDataURL();
+        if (dataURL !== "data:,") sigData = dataURL.split(",")[1];
+      }
+      await drawSignatureSlot(pdfPage, sigData, slotIndex);
+    }
+
+    // 6) Salva e dispara download
+    const pdfBytes = await pdfDoc.save();
+    const blob     = new Blob([pdfBytes], { type: "application/pdf" });
+    const url      = URL.createObjectURL(blob);
+    const a        = document.createElement("a");
+    a.href         = url;
+    a.download     = "preventivas_preenchidas.pdf";
+    a.click();
+  }
+</script>
+
+
+
+
+
+
   </body>
 </html>
