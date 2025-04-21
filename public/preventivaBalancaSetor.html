@@ -345,18 +345,18 @@
     const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const form         = pdfDoc.getForm();
 
-    /**
-     * Obtém o retângulo do widget de um campo no PDF.
-     * @param {string} fieldName  
-     * @returns {{x:number,y:number,width:number,height:number}}
+     /**
+     * Tenta obter o retângulo de um campo; retorna null se não existir.
+     * @param {string} fieldName
+     * @returns {{x:number,y:number,width:number,height:number}|null}
      */
-    function getFieldRectangle(fieldName) {
+     function getFieldRectangle(fieldName) {
       try {
-        const field  = form.getField(fieldName);
-        const widget = field.acroField.getWidgets()[0];
+        const f = form.getField(fieldName);
+        const widget = f.acroField.getWidgets()[0];
         return widget.getRectangle();
       } catch {
-        return { x: 0, y: 0, width: 0, height: 0 };
+        return null;
       }
     }
 
