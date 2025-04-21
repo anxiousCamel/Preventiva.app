@@ -302,7 +302,7 @@
         }
       });
     </script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script>
   /**
    * Converte um File em string Base64
@@ -322,109 +322,131 @@
    * Gera o PDF preenchido com N preventivas, 2 por página.
    */
   async function generateFilledPDF() {
-    const { PDFDocument } = PDFLib;
+    const { PDFDocument, StandardFonts } = PDFLib;
 
     // 1) Carrega template
     const templateUrl   = "CHEK LIST PREVENTIVA BALANÇAS.pdf";
-    const templateBytes = await fetch(templateUrl).then(res => res.arrayBuffer());
+    const templateBytes = await fetch(templateUrl).then(r => r.arrayBuffer());
     const pdfDoc        = await PDFDocument.load(templateBytes);
 
-    // 2) Quantidade de equipamentos disponíveis no HTML
+    // 2) Calcula quantas páginas precisa
     const equipmentCount = document.querySelectorAll("form[id^='preventiveForm_']").length;
-    const perPage        = 2;                     // 2 preventivas por página
+    const perPage        = 2;
     const pageCount      = Math.ceil(equipmentCount / perPage);
-    const deltaX         = 250;                   // deslocamento horizontal entre slots (ajuste conforme PDF)
+    const deltaX         = 355;
 
-    // 3) Prepara array de páginas: a primeira já existe
-    const pages   = pdfDoc.getPages();
-    const basePage = pages[0];
-    // clona quantas páginas faltam
-    for (let p = 1; p < pageCount; p++) {
+    // 3) Clona páginas extras
+    for (let i = 1; i < pageCount; i++) {
       const [cloned] = await pdfDoc.copyPages(pdfDoc, [0]);
       pdfDoc.addPage(cloned);
     }
 
-    // 4) Funções auxiliares --------------------------------------------------
+    // 4) Embute fonte e form
+    const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const form         = pdfDoc.getForm();
 
     /**
-     * Preenche um campo de texto interativo (apenas no slot 0)
-     * @param {string} selector   Seletor do input HTML
-     * @param {string} fieldName  Nome do campo no PDF
+     * Obtém o retângulo do widget de um campo no PDF.
+     * @param {string} fieldName  
+     * @returns {{x:number,y:number,width:number,height:number}}
      */
-    function fillTextField(selector, fieldName) {
-      const el = document.querySelector(selector);
-      if (el) pdfDoc.getForm().getTextField(fieldName).setText(el.value || "");
-    }
-
-    /**
-     * Verifica e marca/desmarca um checkbox interativo (apenas slot 0)
-     * @param {string} selector
-     * @param {string} boxName
-     */
-    function fillCheckbox(selector, boxName) {
-      const el = document.querySelector(selector);
-      const chk = pdfDoc.getForm().getCheckBox(boxName);
-      if (el && chk) {
-        el.checked ? chk.check() : chk.uncheck();
-      }
-    }
-
-    /**
-     * Desenha uma imagem binária em um slot específico.
-     * @param {PDFPage} page
-     * @param {string} fieldName  campo de referência no PDF (slot 0)
-     * @param {string|null} base64WithPrefix
-     * @param {{x:number,y:number,width:number,height:number}} defaultPos
-     * @param {number} slotIndex  0 ou 1 para posicionar
-     */
-    async function drawImageSlot(page, fieldName, base64WithPrefix, defaultPos, slotIndex) {
-      if (!base64WithPrefix) return;
-      const [prefix, data] = base64WithPrefix.split(",");
-      let embedded;
-      if (prefix.includes("jpeg") || prefix.includes("jpg")) {
-        embedded = await pdfDoc.embedJpg(data);
-      } else {
-        embedded = await pdfDoc.embedPng(data);
-      }
-
-      // obtém coords do campo
-      let x, y, w, h;
+    function getFieldRectangle(fieldName) {
       try {
-        const field  = pdfDoc.getForm().getTextField(fieldName);
+        const field  = form.getField(fieldName);
         const widget = field.acroField.getWidgets()[0];
-        const rect   = widget.getRectangle();
-        ({ x, y, width: w, height: h } = rect);
+        return widget.getRectangle();
       } catch {
-        ({ x, y, width: w, height: h } = defaultPos);
+        return { x: 0, y: 0, width: 0, height: 0 };
       }
+    }
 
-      // aplica deslocamento no X para slot 1
-      page.drawImage(embedded, {
+    /**
+     * Desenha texto baseado na posição de um campo interativo.
+     * @param {PDFPage} page
+     * @param {string} fieldName  nome do campo no PDF
+     * @param {string} text
+     * @param {number} slotIndex  0 ou 1
+     */
+    function drawTextFieldDirect(page, fieldName, text, slotIndex) {
+      if (!text) return;
+      const { x, y, height } = getFieldRectangle(fieldName);
+      page.drawText(text, {
         x: x + slotIndex * deltaX,
-        y,
-        width:  w,
-        height: h
+        y: y + height - 12,   // ajusta baseline para caber no campo
+        size: 12,
+        font: helveticaFont
       });
     }
 
     /**
-     * Desenha a assinatura no slot indicado.
+     * Desenha um "X" para marcar um checkbox.
      * @param {PDFPage} page
-     * @param {string} base64Data  sem prefixo
+     * @param {string} fieldName  
+     * @param {boolean} checked
+     * @param {number} slotIndex
+     */
+    function drawCheckboxFieldDirect(page, fieldName, checked, slotIndex) {
+      if (!checked) return;
+      const { x, y, height } = getFieldRectangle(fieldName);
+      page.drawText("X", {
+        x: x + slotIndex * deltaX + 2,
+        y: y + (height / 2) - 4,
+        size: height,
+        font: helveticaFont
+      });
+    }
+
+    /**
+     * Desenha imagem (antes/depois) num slot.
+     * @param {PDFPage} page
+     * @param {string} fieldName
+     * @param {string|null} base64WithPrefix
+     * @param {{x:number,y:number,width:number,height:number}} defaultPos
+     * @param {number} slotIndex
+     */
+    async function drawImageSlot(page, fieldName, base64WithPrefix, defaultPos, slotIndex) {
+      if (!base64WithPrefix) return;
+      const [prefix, data] = base64WithPrefix.split(",");
+      const embedded = prefix.includes("jpeg") || prefix.includes("jpg")
+        ? await pdfDoc.embedJpg(data)
+        : await pdfDoc.embedPng(data);
+
+      let x, y, width, height;
+      try {
+        const field  = form.getField(fieldName);
+        const widget = field.acroField.getWidgets()[0];
+        ({ x, y, width, height } = widget.getRectangle());
+      } catch {
+        ({ x, y, width, height } = defaultPos);
+      }
+
+      page.drawImage(embedded, {
+        x: x + slotIndex * deltaX,
+        y,
+        width,
+        height
+      });
+    }
+
+    /**
+     * Desenha assinatura num slot.
+     * @param {PDFPage} page
+     * @param {string|null} base64Data  sem prefixo
      * @param {number} slotIndex
      */
     async function drawSignatureSlot(page, base64Data, slotIndex) {
       if (!base64Data) return;
       const image = await pdfDoc.embedPng(base64Data);
-      // pega coords de signatureTi
+
       let sx, sy, sw, sh;
       try {
-        const field  = pdfDoc.getForm().getTextField("signatureTi");
-        const rect   = field.acroField.getWidgets()[0].getRectangle();
-        ({ x: sx, y: sy, width: sw, height: sh } = rect);
+        const field  = form.getField("signatureTi");
+        const widget = field.acroField.getWidgets()[0];
+        ({ x: sx, y: sy, width: sw, height: sh } = widget.getRectangle());
       } catch {
         sx = 50; sy = 200; sw = 150; sh = 50;
       }
+
       page.drawImage(image, {
         x: sx + slotIndex * deltaX,
         y: sy,
@@ -433,44 +455,55 @@
       });
     }
 
-    // 5) Loop principal: para cada equipamento, determine página e slot -----
+    // 5) Loop principal
     for (let idx = 0; idx < equipmentCount; idx++) {
-      const pageIndex = Math.floor(idx / perPage);
+      const page      = pdfDoc.getPages()[Math.floor(idx / perPage)];
       const slotIndex = idx % perPage;
-      const pdfPage   = pdfDoc.getPages()[pageIndex];
 
-      // 5.1) Text fields (somente slot 0 é interativo — duplicamos valores)
-      if (slotIndex === 0) {
-        fillTextField(`#numero_${idx}`,      "equipment_number");
-        fillTextField(`#setor_${idx}`,       "equipment_sector");
-        fillTextField(`#serie_${idx}`,       "equipment_serial");
-        fillTextField(`#patrimonio_${idx}`,  "equipment_patrimonio");
-      }
+      // lê valores do DOM
+      const numberValue    = document.getElementById(`numero_${idx}`)?.value    || "";
+      const sectorValue    = document.getElementById(`setor_${idx}`)?.value     || "";
+      const serialValue    = document.getElementById(`serie_${idx}`)?.value     || "";
+      const patrimonyValue = document.getElementById(`patrimonio_${idx}`)?.value|| "";
 
-      // 5.2) Checkboxes (idem, só slot 0)
-      fillCheckbox(`#limparCabecote_${idx}`, "checkbox_limparCabecote");
-      // repita para os demais checkboxes...
+      // desenha textos
+      drawTextFieldDirect(page, "equipment_number",    numberValue,    slotIndex);
+      drawTextFieldDirect(page, "equipment_sector",    sectorValue,    slotIndex);
+      drawTextFieldDirect(page, "equipment_serial",    serialValue,    slotIndex);
+      drawTextFieldDirect(page, "equipment_patrimonio",patrimonyValue, slotIndex);
 
-      // 5.3) Imagens “antes” e “depois”
-      const beforeInput = document.querySelector(`#fotoAntes_${idx}`);
-      const afterInput  = document.querySelector(`#fotoDepois_${idx}`);
-      const before64    = beforeInput?.files[0] ? await fileToBase64(beforeInput.files[0]) : null;
-      const after64     = afterInput?.files[0]  ? await fileToBase64(afterInput.files[0])  : null;
+      // checkboxes (exemplos)
+      const clearHeadChecked   = document.getElementById(`limparCabecote_${idx}`)?.checked;
+      const printTestChecked   = document.getElementById(`testeImpressao_${idx}`)?.checked;
+      // ... repita para os demais
 
-      await drawImageSlot(pdfPage, "before_cleaning", before64, { x:50,  y:400, width:200, height:150 }, slotIndex);
-      await drawImageSlot(pdfPage, "after_cleaning",  after64,  { x:300, y:400, width:200, height:150 }, slotIndex);
+      drawCheckboxFieldDirect(page, "checkbox_limparCabecote", clearHeadChecked, slotIndex);
+      drawCheckboxFieldDirect(page, "checkbox_testeImpressao", printTestChecked, slotIndex);
+      // ... repita para os demais
 
-      // 5.4) Assinatura
+      // imagens
+      const beforeFile = document.getElementById(`fotoAntes_${idx}`)?.files[0];
+      const afterFile  = document.getElementById(`fotoDepois_${idx}`)?.files[0];
+      const before64   = beforeFile ? await fileToBase64(beforeFile) : null;
+      const after64    = afterFile  ? await fileToBase64(afterFile)  : null;
+
+      await drawImageSlot(page, "before_cleaning", before64, { x:50,  y:400, width:200, height:150 }, slotIndex);
+      await drawImageSlot(page, "after_cleaning",  after64,  { x:300, y:400, width:200, height:150 }, slotIndex);
+
+      // assinatura
       const canvas = document.getElementById(`signatureCanvas_${idx}`);
       let sigData = null;
       if (canvas) {
         const dataURL = canvas.toDataURL();
         if (dataURL !== "data:,") sigData = dataURL.split(",")[1];
       }
-      await drawSignatureSlot(pdfPage, sigData, slotIndex);
+      await drawSignatureSlot(page, sigData, slotIndex);
     }
 
-    // 6) Salva e dispara download
+    // 6) Flatten para fixar tudo e evitar sobreposição de campos em branco
+    form.flatten();
+
+    // 7) Salva e dispara download
     const pdfBytes = await pdfDoc.save();
     const blob     = new Blob([pdfBytes], { type: "application/pdf" });
     const url      = URL.createObjectURL(blob);
@@ -480,10 +513,6 @@
     a.click();
   }
 </script>
-
-
-
-
 
 
   </body>
