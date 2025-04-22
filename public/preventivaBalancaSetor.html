@@ -51,12 +51,127 @@
         border-radius: 3px;
         cursor: pointer;
       }
+
+      /* -------------------------------------
+   Gooey Checkbox Styles (de avstorm)
+   ------------------------------------- */
+
+/* reset básico para checkbox customizado */
+input[type="checkbox"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+  margin: 0;
+}
+input[type="checkbox"]:focus {
+  outline: none;
+}
+
+/* container da bolinha */
+.cbx {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+/* círculo não-checked */
+.cbx input {
+  position: absolute;
+  top: 0; left: 0;
+  width: 24px; height: 24px;
+  border: 2px solid #bfbfc0;
+  border-radius: 50%;
+  transition: all .2s ease;
+}
+.cbx input:hover {
+  border-color: #a9a9a9;
+}
+
+/* círculo “goo” por trás */
+.cbx label {
+  position: absolute;
+  top: 0; left: 0;
+  width: 24px; height: 24px;
+  background: none;
+  border-radius: 50%;
+  filter: url(#goo);
+  transform: translate3d(0,0,0);
+  pointer-events: none;
+}
+
+/* ícone de checkmark */
+.cbx svg {
+  position: absolute;
+  top: 5px; left: 4px;
+  z-index: 1;
+  pointer-events: none;
+}
+.cbx svg path {
+  stroke: white;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 19;
+  stroke-dashoffset: 19;
+  transition: all .4s ease;
+}
+
+/* animação ao marcar */
+input[type="checkbox"]:checked + label {
+  animation: splash .6s ease forwards;
+}
+input[type="checkbox"]:checked + label + svg path {
+  stroke-dashoffset: 0;
+}
+
+@keyframes splash {
+  0%   { transform: scale(1.1); }
+  40%  { transform: scale(1); background: #4C95F7;
+         box-shadow:
+           0 -18px 0 -8px #4C95F7,
+           16px -8px 0 -8px #4C95F7,
+           16px 8px 0 -8px #4C95F7,
+           0 18px 0 -8px #4C95F7,
+           -16px 8px 0 -8px #4C95F7,
+           -16px -8px 0 -8px #4C95F7; }
+  100% { background: #4C95F7;
+         box-shadow:
+           0 -32px 0 -10px transparent,
+           28px -16px 0 -10px transparent,
+           28px 16px 0 -10px transparent,
+           0 32px 0 -10px transparent,
+           -28px 16px 0 -10px transparent,
+           -28px -16px 0 -10px transparent; }
+}
+
+
+      
     </style>
     <!-- Biblioteca pdf-lib (versão 1.17.1) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
   </head>
 
   <body>
+    <!-- Gooey filter SVG -->
+<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute; width:0; height:0; pointer-events:none;">
+  <defs>
+    <filter id="goo">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
+      <feColorMatrix in="blur" mode="matrix"
+        values="1 0 0 0 0  
+                0 1 0 0 0  
+                0 0 1 0 0  
+                0 0 0 22 -7"
+        result="goo" />
+      <feBlend in="SourceGraphic" in2="goo" />
+    </filter>
+  </defs>
+</svg>
+
     <h1>Preventiva - Carrossel de Balanças</h1>
 
     <!-- Container do carrossel -->
@@ -92,6 +207,47 @@
           previewImg.style.display = "none";
         }
       }
+
+      // checklist options: idSuffix e labelText
+const CHECKLIST_OPTIONS = [
+  { idSuffix: 'limparCabecote', labelText: 'Limpar cabeçote' },
+  { idSuffix: 'testeImpressao', labelText: 'Teste de impressão' },
+  { idSuffix: 'pesoBalanca',     labelText: 'Peso da balança' },
+  { idSuffix: 'teclado',         labelText: 'Teclado' },
+  { idSuffix: 'display',         labelText: 'Display' },
+  { idSuffix: 'nivelarBalanca',  labelText: 'Nivelar balança' },
+  { idSuffix: 'cabos',           labelText: 'Cabos' },
+  { idSuffix: 'retirarAdesivo',  labelText: 'Retirar adesivo e outros' },
+  { idSuffix: 'tampas',          labelText: 'Tampas' },
+  { idSuffix: 'limpezaBalanca',  labelText: 'Limpeza da balança' },
+];
+
+
+      /**
+ * Gera o HTML de um único item de checklist com Gooey Checkbox.
+ * @param {number} index  — índice do slide
+ * @param {string} idSuffix — sufixo único para o ID
+ * @param {string} labelText — texto que aparece ao lado
+ * @returns {string} bloco HTML
+ */
+function createChecklistItem(index, idSuffix, labelText) {
+  const fieldId = `${idSuffix}_${index}`;
+  return `
+    <div class="checklist-item" style="display:flex; align-items:center; margin-bottom:8px;">
+      <div class="cbx">
+        <input type="checkbox" id="${fieldId}" name="checklist" value="${idSuffix}">
+        <label for="${fieldId}"></label>
+        <svg width="15" height="14" viewBox="0 0 15 14" fill="none">
+          <path d="M2 8.36364L6.23077 12L13 2"/>
+        </svg>
+      </div>
+      <label for="${fieldId}" style="user-select:none; cursor:pointer;">
+        ${labelText}
+      </label>
+    </div>
+  `;
+}
+
 
       // Monta os formulários (slides) se os dados existirem
       if (equipamentosData) {
@@ -145,51 +301,17 @@
                 <img id="previewFotoAntes_${index}" style="max-width:100%; display:none; margin-top:10px;" alt="Pré-visualização da foto antes">
               </div>
                </fieldset>
+
+               
             
             <!-- Checklist da Preventiva -->
             <fieldset>
               <legend>Checklist da Preventiva</legend>
-              <div>
-                <input type="checkbox" id="limparCabecote_${index}" name="checklist" value="limparCabecote">
-                <label for="limparCabecote_${index}">Limpar cabeçote</label>
-              </div>
-              <div>
-                <input type="checkbox" id="testeImpressao_${index}" name="checklist" value="testeImpressao">
-                <label for="testeImpressao_${index}">Teste de impressão</label>
-              </div>
-              <div>
-                <input type="checkbox" id="pesoBalança_${index}" name="checklist" value="pesoBalança">
-                <label for="pesoBalança_${index}">Peso da balança</label>
-              </div>
-              <div>
-                <input type="checkbox" id="teclado_${index}" name="checklist" value="teclado">
-                <label for="teclado_${index}">Teclado</label>
-              </div>
-              <div>
-                <input type="checkbox" id="display_${index}" name="checklist" value="display">
-                <label for="display_${index}">Display</label>
-              </div>
-              <div>
-                <input type="checkbox" id="nivelarBalança_${index}" name="checklist" value="nivelarBalança">
-                <label for="nivelarBalança_${index}">Nivelar balança</label>
-              </div>
-              <div>
-                <input type="checkbox" id="cabos_${index}" name="checklist" value="cabos">
-                <label for="cabos_${index}">Cabos</label>
-              </div>
-              <div>
-                <input type="checkbox" id="retirarAdesivo_${index}" name="checklist" value="retirarAdesivo">
-                <label for="retirarAdesivo_${index}">Retirar adesivo e outros</label>
-              </div>
-              <div>
-                <input type="checkbox" id="tampas_${index}" name="checklist" value="tampas">
-                <label for="tampas_${index}">Tampas</label>
-              </div>
-              <div>
-                <input type="checkbox" id="limpezaBalança_${index}" name="checklist" value="limpezaBalança">
-                <label for="limpezaBalança_${index}">Limpeza da balança</label>
-              </div>
+              ${CHECKLIST_OPTIONS
+                .map(opt => createChecklistItem(index, opt.idSuffix, opt.labelText))
+                .join('')}
             </fieldset>
+
             
             <!-- Fotos da Preventiva -->
             <fieldset>
@@ -589,7 +711,7 @@
           )?.checked;
           // Peso da balança
           const weightChecked = document.getElementById(
-            `pesoBalança_${idx}`
+            `pesoBalanca_${idx}`
           )?.checked;
           // Teclado
           const keyboardChecked = document.getElementById(
@@ -601,7 +723,7 @@
           )?.checked;
           // Nivelar balança
           const levelingChecked = document.getElementById(
-            `nivelarBalança_${idx}`
+            `nivelarBalanca_${idx}`
           )?.checked;
           // Cabos
           const cablesChecked = document.getElementById(
