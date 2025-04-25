@@ -206,7 +206,7 @@
       /**
        * Mostra a pré-visualização da imagem.
        * @param {HTMLInputElement} fileInput - O input de arquivo
-       * @param {HTMLImageElement} previewImg - A imagem onde será exibida a pré-visualização
+       * @param {HTMLImageElement} previewImg - Elemento <img> para exibir a prévia
        */
       function previewImage(fileInput, previewImg) {
         const file = fileInput.files[0];
@@ -222,9 +222,9 @@
         }
       }
     
-      // Opções de checklist: idSuffix e labelText
+      // checklist options: idSuffix e labelText
       const CHECKLIST_OPTIONS = [
-        { idSuffix: "limparCabecote", labelText: "Limpar cabeçote" },
+        { idSuffix: "limparCabecote",  labelText: "Limpar cabeçote" },
         { idSuffix: "testeImpressao",  labelText: "Teste de impressão" },
         { idSuffix: "pesoBalanca",     labelText: "Peso da balança" },
         { idSuffix: "teclado",         labelText: "Teclado" },
@@ -238,10 +238,10 @@
     
       /**
        * Gera o HTML de um item do checklist com Gooey Checkbox.
-       * @param {number} slideIndex — índice do slide (apenas para ID único)
-       * @param {string} idSuffix — sufixo para ID
-       * @param {string} labelText — texto da label
-       * @returns {string} bloco HTML do checklist item
+       * @param {number} slideIndex – índice do slide para ID único
+       * @param {string} idSuffix – sufixo único para o ID
+       * @param {string} labelText – texto exibido
+       * @returns {string} bloco de HTML
        */
       function createChecklistItem(slideIndex, idSuffix, labelText) {
         const fieldId = `${idSuffix}_${slideIndex}`;
@@ -251,7 +251,7 @@
               <input type="checkbox" id="${fieldId}" name="checklist" value="${idSuffix}">
               <label for="${fieldId}"></label>
               <svg width="15" height="14" viewBox="0 0 15 14" fill="none">
-                <path d="M2 8.36364L6.23077 12L13 2"/>
+                <path d="M2 8.36364L6.23077 12L13 2" />
               </svg>
             </div>
             <label for="${fieldId}" style="user-select:none; cursor:pointer;">
@@ -261,24 +261,22 @@
         `;
       }
     
-      // Se houver dados, gera os formulários (slides)
       if (equipamentosData) {
         const equipamentos = JSON.parse(equipamentosData);
     
-        // Cria array de índices e ordena alfabeticamente por setor
+        // Ordena índices por setor (alfabético)
         const sortedIndices = equipamentos
           .map((_, idx) => idx)
           .sort((a, b) => {
-            const sa = (equipamentos[a].setor || "").toLowerCase();
-            const sb = (equipamentos[b].setor || "").toLowerCase();
-            if (sa < sb) return -1;
-            if (sa > sb) return  1;
-            return a - b;
+            const sectorA = (equipamentos[a].setor || "").toLowerCase();
+            const sectorB = (equipamentos[b].setor || "").toLowerCase();
+            return sectorA.localeCompare(sectorB) || a - b;
           });
     
-        // Para cada índice ordenado, gera o slide/form
+        let lastSector = null;
         sortedIndices.forEach((originalIdx, sortedIdx) => {
           const equipamento = equipamentos[originalIdx];
+          const thisSector = (equipamento.setor || "").toLowerCase();
           const slide = document.createElement("div");
           slide.classList.add("slide");
     
@@ -288,137 +286,91 @@
           form.method = "post";
           form.enctype = "multipart/form-data";
     
-          // HTML base: dados, fotos antes, checklist, fotos depois, observações
+          // HTML base
           let html = `
             <fieldset>
               <legend>Dados da Balança ${sortedIdx + 1}</legend>
-              <div>
-                <label for="numero_${sortedIdx}">Número da Balança:</label>
-                <input type="text" id="numero_${sortedIdx}" name="numero" readonly
-                       value="${equipamento.numero || ""}">
-              </div>
-              <div>
-                <label for="setor_${sortedIdx}">Setor da Balança:</label>
-                <input type="text" id="setor_${sortedIdx}" name="setor" readonly
-                       value="${equipamento.setor || ""}">
-              </div>
-              <div>
-                <label for="serie_${sortedIdx}">Série da Balança:</label>
-                <input type="text" id="serie_${sortedIdx}" name="serie" readonly
-                       value="${equipamento.serie || ""}">
-              </div>
-              <div>
-                <label for="patrimonio_${sortedIdx}">Patrimônio da Balança:</label>
-                <input type="text" id="patrimonio_${sortedIdx}" name="patrimonio" readonly
-                       value="${equipamento.patrimonio || ""}">
-              </div>
+              <div><label for="numero_${sortedIdx}">Número:</label>
+                   <input type="text" id="numero_${sortedIdx}" name="numero" readonly value="${equipamento.numero || ""}"></div>
+              <div><label for="setor_${sortedIdx}">Setor:</label>
+                   <input type="text" id="setor_${sortedIdx}" name="setor" readonly value="${equipamento.setor || ""}"></div>
+              <div><label for="serie_${sortedIdx}">Série:</label>
+                   <input type="text" id="serie_${sortedIdx}" name="serie" readonly value="${equipamento.serie || ""}"></div>
+              <div><label for="patrimonio_${sortedIdx}">Patrimônio:</label>
+                   <input type="text" id="patrimonio_${sortedIdx}" name="patrimonio" readonly value="${equipamento.patrimonio || ""}"></div>
             </fieldset>
     
             <fieldset>
-              <legend>Fotos da Preventiva - Antes</legend>
-              <div>
-                <label for="fotoAntes_${sortedIdx}">Foto antes:</label>
-                <input type="file" id="fotoAntes_${sortedIdx}" name="fotoAntes"
-                       accept="image/*" capture="environment">
-                <img id="previewFotoAntes_${sortedIdx}"
-                     style="max-width:100%; display:none; margin-top:10px;"
-                     alt="Prévia">
-              </div>
+              <legend>Fotos Antes</legend>
+              <input type="file" id="fotoAntes_${sortedIdx}" name="fotoAntes" accept="image/*" capture="environment">
+              <img id="previewFotoAntes_${sortedIdx}" alt="Prévia" style="max-width:100%; display:none; margin-top:10px;">
             </fieldset>
     
             <fieldset>
               <legend>Checklist</legend>
-              ${CHECKLIST_OPTIONS
-                .map(opt => createChecklistItem(sortedIdx, opt.idSuffix, opt.labelText))
-                .join("")}
+              ${CHECKLIST_OPTIONS.map(opt => createChecklistItem(sortedIdx, opt.idSuffix, opt.labelText)).join('')}
             </fieldset>
     
             <fieldset>
-              <legend>Fotos da Preventiva - Depois</legend>
-              <div>
-                <label for="fotoDepois_${sortedIdx}">Foto depois:</label>
-                <input type="file" id="fotoDepois_${sortedIdx}" name="fotoDepois"
-                       accept="image/*" capture="environment">
-                <img id="previewFotoDepois_${sortedIdx}"
-                     style="max-width:100%; display:none; margin-top:10px;"
-                     alt="Prévia">
-              </div>
+              <legend>Fotos Depois</legend>
+              <input type="file" id="fotoDepois_${sortedIdx}" name="fotoDepois" accept="image/*" capture="environment">
+              <img id="previewFotoDepois_${sortedIdx}" alt="Prévia" style="max-width:100%; display:none; margin-top:10px;">
             </fieldset>
     
             <fieldset>
               <legend>Observações</legend>
-              <textarea id="observacoes_${sortedIdx}" name="observacoes"
-                        rows="4" style="width:100%;"
-                        placeholder="Digite observações..."></textarea>
+              <textarea id="observacoes_${sortedIdx}" name="observacoes" rows="4" style="width:100%;" placeholder="Digite observações..."></textarea>
             </fieldset>
           `;
     
-          // ------------- Ajuste de assinatura -------------
-          // Usa originalIdx para garantir assinatura no primeiro item de cada par da lista original
-          if (originalIdx % 2 === 0) {
+          // Adiciona assinaturas apenas no primeiro slide de cada setor
+          if (sortedIdx === 0 || thisSector !== lastSector) {
             html += `
               <fieldset>
                 <legend>Assinatura Responsável pelo Setor</legend>
                 <label for="nomeResponsavel_${sortedIdx}">Nome:</label>
-                <input type="text" id="nomeResponsavel_${sortedIdx}"
-                       name="nomeResponsavel" placeholder="Nome do responsável">
+                <input type="text" id="nomeResponsavel_${sortedIdx}" name="nomeResponsavel" placeholder="Nome do responsável">
                 <label for="cargoResponsavel_${sortedIdx}">Cargo:</label>
                 <select id="cargoResponsavel_${sortedIdx}" name="cargoResponsavel">
-                  <option value="Responsável de Setor">Responsável de Setor</option>
-                  <option value="Gerente">Gerente</option>
-                  <option value="Supervisor">Supervisor</option>
+                  <option>Responsável de Setor</option>
+                  <option>Gerente</option>
+                  <option>Supervisor</option>
                 </select>
                 <p>Assinatura:</p>
-                <canvas id="signatureCanvasResponsavel_${sortedIdx}"
-                        width="300" height="150" style="border:1px solid #ccc;"></canvas><br>
-                <button type="button"
-                        onclick="clearSignature('Responsavel', ${sortedIdx})">
-                  Limpar Assinatura
-                </button>
-                <input type="hidden" name="assinaturaResponsavel"
-                       id="assinaturaInputResponsavel_${sortedIdx}">
+                <canvas id="signatureCanvasResponsavel_${sortedIdx}" width="300" height="150" style="border:1px solid #ccc;"></canvas><br>
+                <button type="button" onclick="clearSignature('Responsavel', ${sortedIdx})">Limpar</button>
+                <input type="hidden" id="assinaturaInputResponsavel_${sortedIdx}" name="assinaturaResponsavel">
               </fieldset>
     
               <fieldset>
                 <legend>Assinatura Técnico de TI</legend>
                 <label for="nomeTi_${sortedIdx}">Nome:</label>
-                <input type="text" id="nomeTi_${sortedIdx}" name="nomeTi"
-                       placeholder="Nome do técnico">
+                <input type="text" id="nomeTi_${sortedIdx}" name="nomeTi" placeholder="Nome do técnico">
                 <p>Assinatura:</p>
-                <canvas id="signatureCanvasTi_${sortedIdx}"
-                        width="300" height="150" style="border:1px solid #ccc;"></canvas><br>
-                <button type="button"
-                        onclick="clearSignature('Ti', ${sortedIdx})">
-                  Limpar Assinatura
-                </button>
-                <input type="hidden" name="assinaturaTi"
-                       id="assinaturaInputTi_${sortedIdx}">
+                <canvas id="signatureCanvasTi_${sortedIdx}" width="300" height="150" style="border:1px solid #ccc;"></canvas><br>
+                <button type="button" onclick="clearSignature('Ti', ${sortedIdx})">Limpar</button>
+                <input type="hidden" id="assinaturaInputTi_${sortedIdx}" name="assinaturaTi">
               </fieldset>
             `;
           }
-          // --------------------------------------------------
+          lastSector = thisSector;
     
           form.innerHTML = html;
           slide.appendChild(form);
           carouselContainer.appendChild(slide);
     
-          // Configura preview de fotos
-          const beforeInput  = form.querySelector(`#fotoAntes_${sortedIdx}`);
-          const beforeImg    = form.querySelector(`#previewFotoAntes_${sortedIdx}`);
-          beforeInput.addEventListener("change", () =>
-            previewImage(beforeInput, beforeImg)
-          );
-    
-          const afterInput   = form.querySelector(`#fotoDepois_${sortedIdx}`);
-          const afterImg     = form.querySelector(`#previewFotoDepois_${sortedIdx}`);
-          afterInput.addEventListener("change", () =>
-            previewImage(afterInput, afterImg)
-          );
+          // configura previews
+          form.querySelector(`#fotoAntes_${sortedIdx}`)
+              .addEventListener('change', e => previewImage(e.target, form.querySelector(`#previewFotoAntes_${sortedIdx}`)));
+          form.querySelector(`#fotoDepois_${sortedIdx}`)
+              .addEventListener('change', e => previewImage(e.target, form.querySelector(`#previewFotoDepois_${sortedIdx}`)));
         });
       } else {
         alert("Dados do equipamento não encontrados. Inicie a preventiva novamente.");
       }
     </script>
+    
+    
     
 
     <script>
