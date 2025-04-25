@@ -373,8 +373,26 @@
           lastSector = thisSector;
 
           form.innerHTML = html;
-          slide.appendChild(form);
-          carouselContainer.appendChild(slide);
+      slide.appendChild(form);
+
+      // Adiciona botão para navegação ao próximo grupo
+      const nextButton = document.createElement("button");
+      nextButton.type = "button";
+      nextButton.textContent = "Próximo";
+      nextButton.onclick = () => {
+        // Rolando a página para o topo
+        window.scrollTo({ top: 0, behavior: "smooth" });
+
+        // Mostrando o próximo slide
+        const nextSlide = carouselContainer.children[sortedIdx + 1];
+        if (nextSlide) {
+          nextSlide.scrollIntoView({ behavior: "smooth" });
+        }
+      };
+      form.appendChild(nextButton);
+
+      carouselContainer.appendChild(slide);
+
 
           // configura previews
           form
