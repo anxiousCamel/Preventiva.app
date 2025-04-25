@@ -56,100 +56,108 @@
    Gooey Checkbox Styles (de avstorm)
    ------------------------------------- */
 
-/* reset básico para checkbox customizado */
-input[type="checkbox"] {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  -webkit-tap-highlight-color: transparent;
-  cursor: pointer;
-  margin: 0;
-}
-input[type="checkbox"]:focus {
-  outline: none;
-}
+      /* reset básico para checkbox customizado */
+      input[type="checkbox"] {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        -webkit-tap-highlight-color: transparent;
+        cursor: pointer;
+        margin: 0;
+      }
 
-/* container da bolinha */
-.cbx {
-  position: relative;
-  width: 24px;
-  height: 24px;
-  display: inline-block;
-  margin-right: 8px;
-}
+      input[type="checkbox"]:focus {
+        outline: none;
+      }
 
-/* círculo não-checked */
-.cbx input {
-  position: absolute;
-  top: 0; left: 0;
-  width: 24px; height: 24px;
-  border: 2px solid #bfbfc0;
-  border-radius: 50%;
-  transition: all .2s ease;
-}
-.cbx input:hover {
-  border-color: #a9a9a9;
-}
+      /* container da bolinha */
+      .cbx {
+        position: relative;
+        width: 24px;
+        height: 24px;
+        display: inline-block;
+        margin-right: 8px;
+      }
 
-/* círculo “goo” por trás */
-.cbx label {
-  position: absolute;
-  top: 0; left: 0;
-  width: 24px; height: 24px;
-  background: none;
-  border-radius: 50%;
-  filter: url(#goo);
-  transform: translate3d(0,0,0);
-  pointer-events: none;
-}
+      /* círculo não-checked */
+      .cbx input {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 24px;
+        height: 24px;
+        border: 2px solid #bfbfc0;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+      }
 
-/* ícone de checkmark */
-.cbx svg {
-  position: absolute;
-  top: 5px; left: 4px;
-  z-index: 1;
-  pointer-events: none;
-}
-.cbx svg path {
-  stroke: white;
-  stroke-width: 3;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 19;
-  stroke-dashoffset: 19;
-  transition: all .4s ease;
-}
+      .cbx input:hover {
+        border-color: #a9a9a9;
+      }
 
-/* animação ao marcar */
-input[type="checkbox"]:checked + label {
-  animation: splash .6s ease forwards;
-}
-input[type="checkbox"]:checked + label + svg path {
-  stroke-dashoffset: 0;
-}
+      /* círculo “goo” por trás */
+      .cbx label {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 24px;
+        height: 24px;
+        background: none;
+        border-radius: 50%;
+        filter: url(#goo);
+        transform: translate3d(0, 0, 0);
+        pointer-events: none;
+      }
 
-@keyframes splash {
-  0%   { transform: scale(1.1); }
-  40%  { transform: scale(1); background: #12408f;
-         box-shadow:
-           0 -18px 0 -8px #12408f,
-           16px -8px 0 -8px #12408f,
-           16px 8px 0 -8px #12408f,
-           0 18px 0 -8px #12408f,
-           -16px 8px 0 -8px #12408f,
-           -16px -8px 0 -8px #12408f; }
-  100% { background: #12408f;
-         box-shadow:
-           0 -32px 0 -10px transparent,
-           28px -16px 0 -10px transparent,
-           28px 16px 0 -10px transparent,
-           0 32px 0 -10px transparent,
-           -28px 16px 0 -10px transparent,
-           -28px -16px 0 -10px transparent; }
-}
+      /* ícone de checkmark */
+      .cbx svg {
+        position: absolute;
+        top: 5px;
+        left: 4px;
+        z-index: 1;
+        pointer-events: none;
+      }
 
+      .cbx svg path {
+        stroke: white;
+        stroke-width: 3;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-dasharray: 19;
+        stroke-dashoffset: 19;
+        transition: all 0.4s ease;
+      }
 
-      
+      /* animação ao marcar */
+      input[type="checkbox"]:checked + label {
+        animation: splash 0.6s ease forwards;
+      }
+
+      input[type="checkbox"]:checked + label + svg path {
+        stroke-dashoffset: 0;
+      }
+
+      @keyframes splash {
+        0% {
+          transform: scale(1.1);
+        }
+
+        40% {
+          transform: scale(1);
+          background: #12408f;
+          box-shadow: 0 -18px 0 -8px #12408f, 16px -8px 0 -8px #12408f,
+            16px 8px 0 -8px #12408f, 0 18px 0 -8px #12408f,
+            -16px 8px 0 -8px #12408f, -16px -8px 0 -8px #12408f;
+        }
+
+        100% {
+          background: #12408f;
+          box-shadow: 0 -32px 0 -10px transparent,
+            28px -16px 0 -10px transparent, 28px 16px 0 -10px transparent,
+            0 32px 0 -10px transparent, -28px 16px 0 -10px transparent,
+            -28px -16px 0 -10px transparent;
+        }
+      }
     </style>
     <!-- Biblioteca pdf-lib (versão 1.17.1) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
@@ -157,20 +165,26 @@ input[type="checkbox"]:checked + label + svg path {
 
   <body>
     <!-- Gooey filter SVG -->
-<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute; width:0; height:0; pointer-events:none;">
-  <defs>
-    <filter id="goo">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
-      <feColorMatrix in="blur" mode="matrix"
-        values="1 0 0 0 0  
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      style="position: absolute; width: 0; height: 0; pointer-events: none"
+    >
+      <defs>
+        <filter id="goo">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
+          <feColorMatrix
+            in="blur"
+            mode="matrix"
+            values="1 0 0 0 0  
                 0 1 0 0 0  
                 0 0 1 0 0  
                 0 0 0 22 -7"
-        result="goo" />
-      <feBlend in="SourceGraphic" in2="goo" />
-    </filter>
-  </defs>
-</svg>
+            result="goo"
+          />
+          <feBlend in="SourceGraphic" in2="goo" />
+        </filter>
+      </defs>
+    </svg>
 
     <h1>Preventiva - Carrossel de Balanças</h1>
 
@@ -188,17 +202,17 @@ input[type="checkbox"]:checked + label + svg path {
       // Recupera os dados dos equipamentos armazenados no sessionStorage
       const equipamentosData = sessionStorage.getItem("equipamentosData");
       const carouselContainer = document.getElementById("carouselContainer");
-
+    
       /**
-       * Função para mostrar a pré-visualização da imagem.
-       * @param {HTMLInputElement} fileInput - O input do arquivo.
-       * @param {HTMLImageElement} previewImg - A imagem onde será exibida a pré-visualização.
+       * Mostra a pré-visualização da imagem.
+       * @param {HTMLInputElement} fileInput - O input de arquivo
+       * @param {HTMLImageElement} previewImg - A imagem onde será exibida a pré-visualização
        */
       function previewImage(fileInput, previewImg) {
         const file = fileInput.files[0];
         if (file) {
           const reader = new FileReader();
-          reader.onload = (e) => {
+          reader.onload = e => {
             previewImg.src = e.target.result;
             previewImg.style.display = "block";
           };
@@ -207,188 +221,205 @@ input[type="checkbox"]:checked + label + svg path {
           previewImg.style.display = "none";
         }
       }
-
-      // checklist options: idSuffix e labelText
-const CHECKLIST_OPTIONS = [
-  { idSuffix: 'limparCabecote', labelText: 'Limpar cabeçote' },
-  { idSuffix: 'testeImpressao', labelText: 'Teste de impressão' },
-  { idSuffix: 'pesoBalanca',     labelText: 'Peso da balança' },
-  { idSuffix: 'teclado',         labelText: 'Teclado' },
-  { idSuffix: 'display',         labelText: 'Display' },
-  { idSuffix: 'nivelarBalanca',  labelText: 'Nivelar balança' },
-  { idSuffix: 'cabos',           labelText: 'Cabos' },
-  { idSuffix: 'retirarAdesivo',  labelText: 'Retirar adesivo e outros' },
-  { idSuffix: 'tampas',          labelText: 'Tampas' },
-  { idSuffix: 'limpezaBalanca',  labelText: 'Limpeza da balança' },
-];
-
-
+    
+      // Opções de checklist: idSuffix e labelText
+      const CHECKLIST_OPTIONS = [
+        { idSuffix: "limparCabecote", labelText: "Limpar cabeçote" },
+        { idSuffix: "testeImpressao",  labelText: "Teste de impressão" },
+        { idSuffix: "pesoBalanca",     labelText: "Peso da balança" },
+        { idSuffix: "teclado",         labelText: "Teclado" },
+        { idSuffix: "display",         labelText: "Display" },
+        { idSuffix: "nivelarBalanca",  labelText: "Nivelar balança" },
+        { idSuffix: "cabos",           labelText: "Cabos" },
+        { idSuffix: "retirarAdesivo",  labelText: "Retirar adesivo e outros" },
+        { idSuffix: "tampas",          labelText: "Tampas" },
+        { idSuffix: "limpezaBalanca",  labelText: "Limpeza da balança" },
+      ];
+    
       /**
- * Gera o HTML de um único item de checklist com Gooey Checkbox.
- * @param {number} index  — índice do slide
- * @param {string} idSuffix — sufixo único para o ID
- * @param {string} labelText — texto que aparece ao lado
- * @returns {string} bloco HTML
- */
-function createChecklistItem(index, idSuffix, labelText) {
-  const fieldId = `${idSuffix}_${index}`;
-  return `
-    <div class="checklist-item" style="display:flex; align-items:center; margin-bottom:8px;">
-      <div class="cbx">
-        <input type="checkbox" id="${fieldId}" name="checklist" value="${idSuffix}">
-        <label for="${fieldId}"></label>
-        <svg width="15" height="14" viewBox="0 0 15 14" fill="none">
-          <path d="M2 8.36364L6.23077 12L13 2"/>
-        </svg>
-      </div>
-      <label for="${fieldId}" style="user-select:none; cursor:pointer;">
-        ${labelText}
-      </label>
-    </div>
-  `;
-}
-
-
-      // Monta os formulários (slides) se os dados existirem
+       * Gera o HTML de um item do checklist com Gooey Checkbox.
+       * @param {number} slideIndex — índice do slide (apenas para ID único)
+       * @param {string} idSuffix — sufixo para ID
+       * @param {string} labelText — texto da label
+       * @returns {string} bloco HTML do checklist item
+       */
+      function createChecklistItem(slideIndex, idSuffix, labelText) {
+        const fieldId = `${idSuffix}_${slideIndex}`;
+        return `
+          <div class="checklist-item" style="display:flex; align-items:center; margin-bottom:8px;">
+            <div class="cbx">
+              <input type="checkbox" id="${fieldId}" name="checklist" value="${idSuffix}">
+              <label for="${fieldId}"></label>
+              <svg width="15" height="14" viewBox="0 0 15 14" fill="none">
+                <path d="M2 8.36364L6.23077 12L13 2"/>
+              </svg>
+            </div>
+            <label for="${fieldId}" style="user-select:none; cursor:pointer;">
+              ${labelText}
+            </label>
+          </div>
+        `;
+      }
+    
+      // Se houver dados, gera os formulários (slides)
       if (equipamentosData) {
         const equipamentos = JSON.parse(equipamentosData);
-        equipamentos.forEach((equipamento, index) => {
+    
+        // Cria array de índices e ordena alfabeticamente por setor
+        const sortedIndices = equipamentos
+          .map((_, idx) => idx)
+          .sort((a, b) => {
+            const sa = (equipamentos[a].setor || "").toLowerCase();
+            const sb = (equipamentos[b].setor || "").toLowerCase();
+            if (sa < sb) return -1;
+            if (sa > sb) return  1;
+            return a - b;
+          });
+    
+        // Para cada índice ordenado, gera o slide/form
+        sortedIndices.forEach((originalIdx, sortedIdx) => {
+          const equipamento = equipamentos[originalIdx];
           const slide = document.createElement("div");
           slide.classList.add("slide");
-
+    
           const form = document.createElement("form");
-          form.setAttribute("id", `preventiveForm_${index}`);
-          form.setAttribute("action", "/savePreventiva");
-          form.setAttribute("method", "post");
-          form.setAttribute("enctype", "multipart/form-data");
-
-          form.innerHTML = `
-            <!-- Dados da Balança -->
+          form.id = `preventiveForm_${sortedIdx}`;
+          form.action = "/savePreventiva";
+          form.method = "post";
+          form.enctype = "multipart/form-data";
+    
+          // HTML base: dados, fotos antes, checklist, fotos depois, observações
+          let html = `
             <fieldset>
-              <legend>Dados da Balança ${index + 1}</legend>
+              <legend>Dados da Balança ${sortedIdx + 1}</legend>
               <div>
-                <label for="numero_${index}">Número da Balança:</label>
-                <input type="text" id="numero_${index}" name="numero" readonly value="${
-            equipamento.numero || ""
-          }">
+                <label for="numero_${sortedIdx}">Número da Balança:</label>
+                <input type="text" id="numero_${sortedIdx}" name="numero" readonly
+                       value="${equipamento.numero || ""}">
               </div>
               <div>
-                <label for="setor_${index}">Setor da Balança:</label>
-                <input type="text" id="setor_${index}" name="setor" readonly value="${
-            equipamento.setor || ""
-          }">
+                <label for="setor_${sortedIdx}">Setor da Balança:</label>
+                <input type="text" id="setor_${sortedIdx}" name="setor" readonly
+                       value="${equipamento.setor || ""}">
               </div>
               <div>
-                <label for="serie_${index}">Série da Balança:</label>
-                <input type="text" id="serie_${index}" name="serie" readonly value="${
-            equipamento.serie || ""
-          }">
+                <label for="serie_${sortedIdx}">Série da Balança:</label>
+                <input type="text" id="serie_${sortedIdx}" name="serie" readonly
+                       value="${equipamento.serie || ""}">
               </div>
               <div>
-                <label for="patrimonio_${index}">Patrimônio da Balança:</label>
-                <input type="text" id="patrimonio_${index}" name="patrimonio" readonly value="${
-            equipamento.patrimonio || ""
-          }">
+                <label for="patrimonio_${sortedIdx}">Patrimônio da Balança:</label>
+                <input type="text" id="patrimonio_${sortedIdx}" name="patrimonio" readonly
+                       value="${equipamento.patrimonio || ""}">
               </div>
             </fieldset>
-
-                        <!-- Fotos da Preventiva -->
+    
             <fieldset>
-              <legend>Fotos da Preventiva</legend>
+              <legend>Fotos da Preventiva - Antes</legend>
               <div>
-                <label for="fotoAntes_${index}">Foto antes da preventiva:</label>
-                <input type="file" id="fotoAntes_${index}" name="fotoAntes" accept="image/*" capture="environment">
-                <img id="previewFotoAntes_${index}" style="max-width:100%; display:none; margin-top:10px;" alt="Pré-visualização da foto antes">
+                <label for="fotoAntes_${sortedIdx}">Foto antes:</label>
+                <input type="file" id="fotoAntes_${sortedIdx}" name="fotoAntes"
+                       accept="image/*" capture="environment">
+                <img id="previewFotoAntes_${sortedIdx}"
+                     style="max-width:100%; display:none; margin-top:10px;"
+                     alt="Prévia">
               </div>
-               </fieldset>
-
-               
-            
-            <!-- Checklist da Preventiva -->
+            </fieldset>
+    
             <fieldset>
-              <legend>Checklist da Preventiva</legend>
+              <legend>Checklist</legend>
               ${CHECKLIST_OPTIONS
-                .map(opt => createChecklistItem(index, opt.idSuffix, opt.labelText))
-                .join('')}
+                .map(opt => createChecklistItem(sortedIdx, opt.idSuffix, opt.labelText))
+                .join("")}
             </fieldset>
-
-            
-            <!-- Fotos da Preventiva -->
+    
             <fieldset>
-               <legend>Fotos da Preventiva</legend>
+              <legend>Fotos da Preventiva - Depois</legend>
               <div>
-                <label for="fotoDepois_${index}">Foto depois da preventiva:</label>
-                <input type="file" id="fotoDepois_${index}" name="fotoDepois" accept="image/*" capture="environment">
-                <img id="previewFotoDepois_${index}" style="max-width:100%; display:none; margin-top:10px;" alt="Pré-visualização da foto depois">
+                <label for="fotoDepois_${sortedIdx}">Foto depois:</label>
+                <input type="file" id="fotoDepois_${sortedIdx}" name="fotoDepois"
+                       accept="image/*" capture="environment">
+                <img id="previewFotoDepois_${sortedIdx}"
+                     style="max-width:100%; display:none; margin-top:10px;"
+                     alt="Prévia">
               </div>
             </fieldset>
-<!-- Observações -->
-<fieldset>
-  <legend>Observações</legend>
-  <label for="observacoes_${index}">Detalhes adicionais:</label>
-  <textarea id="observacoes_${index}" name="observacoes" rows="4" style="width: 100%;" placeholder="Digite aqui observações importantes..."></textarea>
-</fieldset>
-
-<!-- Assinatura Responsável pelo Setor -->
-<fieldset>
-  <legend>Assinatura do Responsável pelo Setor</legend>
-  
-  <label for="nomeResponsavel_${index}">Nome:</label>
-  <input type="text" id="nomeResponsavel_${index}" name="nomeResponsavel" placeholder="Nome do responsável pelo setor">
-  
-  <label for="cargoResponsavel_${index}">Cargo:</label>
-  <select id="cargoResponsavel_${index}" name="cargoResponsavel">
-    <option value="Responsável de Setor">Responsável de Setor</option>
-    <option value="Gerente">Gerente</option>
-    <option value="Supervisor">Supervisor</option>
-  </select>
-
-  <p>Assinatura:</p>
-  <canvas id="signatureCanvasResponsavel_${index}" width="300" height="150" style="border:1px solid #ccc;"></canvas><br>
-  <button type="button" onclick="clearSignature('Responsavel', ${index})">Limpar Assinatura</button>
-  <input type="hidden" name="assinaturaResponsavel" id="assinaturaInputResponsavel_${index}">
-</fieldset>
-
-<!-- Assinatura Técnico de TI -->
-<fieldset>
-  <legend>Assinatura do Técnico de TI</legend>
-  
-  <label for="nomeTi_${index}">Nome:</label>
-  <input type="text" id="nomeTi_${index}" name="nomeTi" placeholder="Nome do técnico de TI">
-
-  <p>Assinatura:</p>
-  <canvas id="signatureCanvasTi_${index}" width="300" height="150" style="border:1px solid #ccc;"></canvas><br>
-  <button type="button" onclick="clearSignature('Ti', ${index})">Limpar Assinatura</button>
-  <input type="hidden" name="assinaturaTi" id="assinaturaInputTi_${index}">
-</fieldset>  
+    
+            <fieldset>
+              <legend>Observações</legend>
+              <textarea id="observacoes_${sortedIdx}" name="observacoes"
+                        rows="4" style="width:100%;"
+                        placeholder="Digite observações..."></textarea>
+            </fieldset>
           `;
-
+    
+          // ------------- Ajuste de assinatura -------------
+          // Usa originalIdx para garantir assinatura no primeiro item de cada par da lista original
+          if (originalIdx % 2 === 0) {
+            html += `
+              <fieldset>
+                <legend>Assinatura Responsável pelo Setor</legend>
+                <label for="nomeResponsavel_${sortedIdx}">Nome:</label>
+                <input type="text" id="nomeResponsavel_${sortedIdx}"
+                       name="nomeResponsavel" placeholder="Nome do responsável">
+                <label for="cargoResponsavel_${sortedIdx}">Cargo:</label>
+                <select id="cargoResponsavel_${sortedIdx}" name="cargoResponsavel">
+                  <option value="Responsável de Setor">Responsável de Setor</option>
+                  <option value="Gerente">Gerente</option>
+                  <option value="Supervisor">Supervisor</option>
+                </select>
+                <p>Assinatura:</p>
+                <canvas id="signatureCanvasResponsavel_${sortedIdx}"
+                        width="300" height="150" style="border:1px solid #ccc;"></canvas><br>
+                <button type="button"
+                        onclick="clearSignature('Responsavel', ${sortedIdx})">
+                  Limpar Assinatura
+                </button>
+                <input type="hidden" name="assinaturaResponsavel"
+                       id="assinaturaInputResponsavel_${sortedIdx}">
+              </fieldset>
+    
+              <fieldset>
+                <legend>Assinatura Técnico de TI</legend>
+                <label for="nomeTi_${sortedIdx}">Nome:</label>
+                <input type="text" id="nomeTi_${sortedIdx}" name="nomeTi"
+                       placeholder="Nome do técnico">
+                <p>Assinatura:</p>
+                <canvas id="signatureCanvasTi_${sortedIdx}"
+                        width="300" height="150" style="border:1px solid #ccc;"></canvas><br>
+                <button type="button"
+                        onclick="clearSignature('Ti', ${sortedIdx})">
+                  Limpar Assinatura
+                </button>
+                <input type="hidden" name="assinaturaTi"
+                       id="assinaturaInputTi_${sortedIdx}">
+              </fieldset>
+            `;
+          }
+          // --------------------------------------------------
+    
+          form.innerHTML = html;
           slide.appendChild(form);
           carouselContainer.appendChild(slide);
-
-          // Evento para pré-visualização das fotos
-          const fotoAntesInput = form.querySelector(`#fotoAntes_${index}`);
-          const previewFotoAntes = form.querySelector(
-            `#previewFotoAntes_${index}`
+    
+          // Configura preview de fotos
+          const beforeInput  = form.querySelector(`#fotoAntes_${sortedIdx}`);
+          const beforeImg    = form.querySelector(`#previewFotoAntes_${sortedIdx}`);
+          beforeInput.addEventListener("change", () =>
+            previewImage(beforeInput, beforeImg)
           );
-          fotoAntesInput.addEventListener("change", () =>
-            previewImage(fotoAntesInput, previewFotoAntes)
-          );
-
-          const fotoDepoisInput = form.querySelector(`#fotoDepois_${index}`);
-          const previewFotoDepois = form.querySelector(
-            `#previewFotoDepois_${index}`
-          );
-          fotoDepoisInput.addEventListener("change", () =>
-            previewImage(fotoDepoisInput, previewFotoDepois)
+    
+          const afterInput   = form.querySelector(`#fotoDepois_${sortedIdx}`);
+          const afterImg     = form.querySelector(`#previewFotoDepois_${sortedIdx}`);
+          afterInput.addEventListener("change", () =>
+            previewImage(afterInput, afterImg)
           );
         });
       } else {
-        alert(
-          "Dados do equipamento não encontrados. Por favor, inicie a preventiva novamente."
-        );
+        alert("Dados do equipamento não encontrados. Inicie a preventiva novamente.");
       }
     </script>
+    
 
     <script>
       // Função para habilitar a área de assinatura em um canvas
@@ -489,7 +520,8 @@ function createChecklistItem(index, idSuffix, labelText) {
       }
 
       /**
-       * Gera o PDF preenchido com N preventivas, 2 por página.
+       * Gera o PDF preenchido agrupando preventivas por setor (até 2 por página).
+       * Se o setor mudar, sempre inicia nova página.
        */
       async function generateFilledPDF() {
         const { PDFDocument, StandardFonts } = PDFLib;
@@ -500,68 +532,49 @@ function createChecklistItem(index, idSuffix, labelText) {
           r.arrayBuffer()
         );
         const pdfDoc = await PDFDocument.load(templateBytes);
-
-        // 2) Calcula quantas páginas precisa
-        const equipmentCount = document.querySelectorAll(
-          "form[id^='preventiveForm_']"
-        ).length;
-        const perPage = 2;
-        const pageCount = Math.ceil(equipmentCount / perPage);
-        const deltaX = 355;
-
-        // 3) Clona páginas extras
-        for (let i = 1; i < pageCount; i++) {
-          const [cloned] = await pdfDoc.copyPages(pdfDoc, [0]);
-          pdfDoc.addPage(cloned);
-        }
-
-        // 4) Embute fonte e form
         const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
         const form = pdfDoc.getForm();
 
-        /**
-         * Tenta obter o retângulo de um campo; retorna null se não existir.
-         * @param {string} fieldName
-         * @returns {{x:number,y:number,width:number,height:number}|null}
-         */
+        const perPage = 2;
+        const deltaX = 355;
+
+        // Pages dinâmicas: começa com uma cópia da página template
+        let pages = [];
+        const [firstPage] = await pdfDoc.copyPages(pdfDoc, [0]);
+        pdfDoc.addPage(firstPage);
+        pages.push(firstPage);
+
+        // Helper: obtém retângulo de um campo (null se não existir)
         function getFieldRectangle(fieldName) {
           try {
-            const f = form.getField(fieldName);
-            const widget = f.acroField.getWidgets()[0];
+            const field = form.getField(fieldName);
+            const widget = field.acroField.getWidgets()[0];
             return widget.getRectangle();
           } catch {
             return null;
           }
         }
 
-        /**
-         * Desenha texto baseado na posição de um campo interativo.
-         * @param {PDFPage} page
-         * @param {string} fieldName  nome do campo no PDF
-         * @param {string} text
-         * @param {number} slotIndex  0 ou 1
-         */
+        // Desenha texto no slot da página
         function drawTextFieldDirect(page, fieldName, text, slotIndex) {
           if (!text) return;
-          const { x, y, height } = getFieldRectangle(fieldName);
+          const rect = getFieldRectangle(fieldName);
+          if (!rect) return;
+          const { x, y, height } = rect;
           page.drawText(text, {
             x: x + slotIndex * deltaX,
-            y: y + height - 12, // ajusta baseline para caber no campo
+            y: y + height - 12,
             size: 12,
             font: helveticaFont,
           });
         }
 
-        /**
-         * Desenha um "X" para marcar um checkbox.
-         * @param {PDFPage} page
-         * @param {string} fieldName
-         * @param {boolean} checked
-         * @param {number} slotIndex
-         */
+        // Desenha 'X' para checkbox
         function drawCheckboxFieldDirect(page, fieldName, checked, slotIndex) {
           if (!checked) return;
-          const { x, y, height } = getFieldRectangle(fieldName);
+          const rect = getFieldRectangle(fieldName);
+          if (!rect) return;
+          const { x, y, height } = rect;
           page.drawText("X", {
             x: x + slotIndex * deltaX + 2,
             y: y + height / 2 - 4,
@@ -570,14 +583,7 @@ function createChecklistItem(index, idSuffix, labelText) {
           });
         }
 
-        /**
-         * Desenha imagem (antes/depois) num slot.
-         * @param {PDFPage} page
-         * @param {string} fieldName
-         * @param {string|null} base64WithPrefix
-         * @param {{x:number,y:number,width:number,height:number}} defaultPos
-         * @param {number} slotIndex
-         */
+        // Desenha imagem (antes/depois) no slot
         async function drawImageSlot(
           page,
           fieldName,
@@ -586,85 +592,101 @@ function createChecklistItem(index, idSuffix, labelText) {
           slotIndex
         ) {
           if (!base64WithPrefix) return;
-          const [prefix, data] = base64WithPrefix.split(",");
-          const embedded =
-            prefix.includes("jpeg") || prefix.includes("jpg")
-              ? await pdfDoc.embedJpg(data)
-              : await pdfDoc.embedPng(data);
-
-          let x, y, width, height;
-          try {
-            const field = form.getField(fieldName);
-            const widget = field.acroField.getWidgets()[0];
-            ({ x, y, width, height } = widget.getRectangle());
-          } catch {
-            ({ x, y, width, height } = defaultPos);
+          const [, data] = base64WithPrefix.split(",");
+          let embedded;
+          if (
+            base64WithPrefix.includes("jpeg") ||
+            base64WithPrefix.includes("jpg")
+          ) {
+            embedded = await pdfDoc.embedJpg(data);
+          } else {
+            embedded = await pdfDoc.embedPng(data);
           }
 
+          let pos = defaultPos;
+          const rect = getFieldRectangle(fieldName);
+          if (rect) pos = rect;
+
           page.drawImage(embedded, {
+            x: pos.x + slotIndex * deltaX,
+            y: pos.y,
+            width: pos.width,
+            height: pos.height,
+          });
+        }
+
+        // Desenha assinatura em PNG (setor ou TI)
+        async function drawSignature(page, fieldName, base64Png, slotIndex) {
+          if (!base64Png) return;
+          const image = await pdfDoc.embedPng(base64Png);
+          const field = form.getField(fieldName);
+          const widget = field.acroField.getWidgets()[0];
+          const { x, y, width, height } = widget.getRectangle();
+          page.drawImage(image, {
             x: x + slotIndex * deltaX,
-            y,
+            y: y,
             width,
             height,
           });
         }
 
-        /**
-         * Desenha assinatura num slot.
-         * @param {PDFPage} page
-         * @param {string|null} base64Data  sem prefixo
-         * @param {number} slotIndex
-         */
-        // Desenha assinatura do setor
-        async function drawSignatureSector(page, base64Png, slotIndex) {
-          if (!base64Png) return;
-          const image = await pdfDoc.embedPng(base64Png);
-
-          // pega a posição do campo signatureSector e renomeia para sx, sy, sw, sh
-          const field = pdfDoc.getForm().getField("signatureSector");
-          const widget = field.acroField.getWidgets()[0];
-          const { x: sx, y: sy, width: sw, height: sh } = widget.getRectangle();
-
-          page.drawImage(image, {
-            x: sx + slotIndex * deltaX,
-            y: sy,
-            width: sw,
-            height: sh,
-          });
-        }
-
-        // Desenha assinatura do TI
-        async function drawSignatureTi(page, base64Png, slotIndex) {
-          if (!base64Png) return;
-          const image = await pdfDoc.embedPng(base64Png);
-
-          const field = pdfDoc.getForm().getField("signatureTi");
-          const widget = field.acroField.getWidgets()[0];
-          const { x: sx, y: sy, width: sw, height: sh } = widget.getRectangle();
-
-          page.drawImage(image, {
-            x: sx + slotIndex * deltaX,
-            y: sy,
-            width: sw,
-            height: sh,
-          });
-        }
-
+        // Recupera dados de hoje para preencher datas
         const today = new Date();
-        const dia = String(today.getDate()).padStart(2, "0");
-        const mes = String(today.getMonth() + 1).padStart(2, "0"); // meses começam em 0
-        const ano = String(today.getFullYear());
+        const day = String(today.getDate()).padStart(2, "0");
+        const month = String(today.getMonth() + 1).padStart(2, "0");
+        const year = String(today.getFullYear());
 
-        // 5) Loop principal
-        for (let idx = 0; idx < equipmentCount; idx++) {
-          const page = pdfDoc.getPages()[Math.floor(idx / perPage)];
-          const slotIndex = idx % perPage;
+        // Coleta todos os formulários no DOM
+        const forms = Array.from(
+          document.querySelectorAll("form[id^='preventiveForm_']")
+        );
 
-          // lê valores do DOM
-          const numberValue =
-            document.getElementById(`numero_${idx}`)?.value || "";
+        // Agrupa índices por setor, mantendo ordem original
+        const sectorGroups = {};
+        forms.forEach((_, idx) => {
+          const sector = document.getElementById(`setor_${idx}`)?.value || "";
+          if (!sectorGroups[sector]) sectorGroups[sector] = [];
+          sectorGroups[sector].push(idx);
+        });
+
+        // Monta sequência de índices respeitando ordem de aparição
+        const orderedIndices = [];
+        Object.values(sectorGroups).forEach((group) =>
+          orderedIndices.push(...group)
+        );
+
+        // Variáveis de controle de página/slot
+        let currentPageIndex = 0;
+        let slotIndex = 0;
+        let previousSector = null;
+
+        for (const idx of orderedIndices) {
           const sectorValue =
             document.getElementById(`setor_${idx}`)?.value || "";
+
+          // Se mudou de setor e slot atual não está vazio, inicia nova página
+          if (sectorValue !== previousSector && slotIndex !== 0) {
+            const [clone] = await pdfDoc.copyPages(pdfDoc, [0]);
+            pdfDoc.addPage(clone);
+            pages.push(clone);
+            currentPageIndex = pages.length - 1;
+            slotIndex = 0;
+          }
+
+          // Se slot cheio (>= perPage), inicia nova página
+          if (slotIndex >= perPage) {
+            const [clone] = await pdfDoc.copyPages(pdfDoc, [0]);
+            pdfDoc.addPage(clone);
+            pages.push(clone);
+            currentPageIndex = pages.length - 1;
+            slotIndex = 0;
+          }
+
+          const page = pages[currentPageIndex];
+
+          // Valores textuais
+          const numberValue =
+            document.getElementById(`numero_${idx}`)?.value || "";
           const serialValue =
             document.getElementById(`serie_${idx}`)?.value || "";
           const patrimonyValue =
@@ -675,145 +697,72 @@ function createChecklistItem(index, idSuffix, labelText) {
             document.getElementById(`nomeResponsavel_${idx}`)?.value || "";
           const nameTiValue =
             document.getElementById(`nomeTi_${idx}`)?.value || "";
-          const cargoResponsavelValue =
+          const roleValue =
             document.getElementById(`cargoResponsavel_${idx}`)?.value || "";
 
-          // desenha textos
+          // Desenha campos de texto
           drawTextFieldDirect(page, "equipment_number", numberValue, slotIndex);
           drawTextFieldDirect(page, "equipment_sector", sectorValue, slotIndex);
           drawTextFieldDirect(page, "equipment_serial", serialValue, slotIndex);
-          drawTextFieldDirect(page,"equipment_patrimonio",patrimonyValue, slotIndex);
+          drawTextFieldDirect(
+            page,
+            "equipment_patrimonio",
+            patrimonyValue,
+            slotIndex
+          );
           drawTextFieldDirect(page, "equipment_obs", obsValue, slotIndex);
           drawTextFieldDirect(page, "nameSector", nameSectorValue, slotIndex);
           drawTextFieldDirect(page, "nameTi", nameTiValue, slotIndex);
-          drawTextFieldDirect(page,"cargoResponsavel", cargoResponsavelValue,slotIndex);
+          drawTextFieldDirect(page, "cargoResponsavel", roleValue, slotIndex);
+          // Datas
+          [
+            "diaTi",
+            "mesTi",
+            "anoTi",
+            "diaResponsavel",
+            "mesResponsavel",
+            "anoResponsavel",
+          ].forEach((field) => {
+            const text = field.includes("dia")
+              ? day
+              : field.includes("mes")
+              ? month
+              : year;
+            drawTextFieldDirect(page, field, text, slotIndex);
+          });
 
-          // preenche campos de data automaticamente
-          drawTextFieldDirect(page, "diaTi", dia, slotIndex);
-          drawTextFieldDirect(page, "mesTi", mes, slotIndex);
-          drawTextFieldDirect(page, "anoTi", ano, slotIndex);
+          // Checkboxes
+          const checkboxes = [
+            "limparCabecote",
+            "testeImpressao",
+            "pesoBalanca",
+            "teclado",
+            "display",
+            "nivelarBalanca",
+            "cabos",
+            "retirarAdesivo",
+            "tampas",
+            "limpezaBalança",
+          ];
+          checkboxes.forEach((name) => {
+            const checked = document.getElementById(
+              `${name.replace(/([A-Z])/g, (m) => m)}_${idx}`
+            )?.checked;
+            drawCheckboxFieldDirect(
+              page,
+              `checkbox_${name}`,
+              checked,
+              slotIndex
+            );
+          });
 
-          drawTextFieldDirect(page, "diaResponsavel", dia, slotIndex);
-          drawTextFieldDirect(page, "mesResponsavel", mes, slotIndex);
-          drawTextFieldDirect(page, "anoResponsavel", ano, slotIndex);
-
-          // ——————————————————————————————————————————
-          // 1️⃣ Pegando o estado dos demais checkboxes no HTML
-          // ——————————————————————————————————————————
-
-          // Limpar cabeçote
-          const clearHeadChecked = document.getElementById(
-            `limparCabecote_${idx}`
-          )?.checked;
-          // Teste de impressao
-          const testPrintingChecked = document.getElementById(
-            `testeImpressao_${idx}`
-          )?.checked;
-          // Peso da balança
-          const weightChecked = document.getElementById(
-            `pesoBalanca_${idx}`
-          )?.checked;
-          // Teclado
-          const keyboardChecked = document.getElementById(
-            `teclado_${idx}`
-          )?.checked;
-          // Display
-          const displayChecked = document.getElementById(
-            `display_${idx}`
-          )?.checked;
-          // Nivelar balança
-          const levelingChecked = document.getElementById(
-            `nivelarBalanca_${idx}`
-          )?.checked;
-          // Cabos
-          const cablesChecked = document.getElementById(
-            `cabos_${idx}`
-          )?.checked;
-          // Retirar adesivos e outros
-          const removeAdhesiveChecked = document.getElementById(
-            `retirarAdesivo_${idx}`
-          )?.checked;
-          // Tampas
-          const coversChecked = document.getElementById(
-            `tampas_${idx}`
-          )?.checked;
-          // Limpeza da balança
-          const cleaningChecked = document.getElementById(
-            `limpezaBalança_${idx}`
-          )?.checked;
-
-          // ——————————————————————————————————————————
-          // 2️⃣ Desenhando o “X” no PDF para cada checkbox
-          // ——————————————————————————————————————————
-          drawCheckboxFieldDirect(
-            page,
-            "checkbox_limparCabecote",
-            clearHeadChecked,
-            slotIndex
-          );
-          drawCheckboxFieldDirect(
-            page,
-            "checkbox_testeDeImpressao",
-            testPrintingChecked,
-            slotIndex
-          );
-          drawCheckboxFieldDirect(
-            page,
-            "checkbox_peso",
-            weightChecked,
-            slotIndex
-          );
-          drawCheckboxFieldDirect(
-            page,
-            "checkbox_teclado",
-            keyboardChecked,
-            slotIndex
-          );
-          drawCheckboxFieldDirect(
-            page,
-            "checkbox_display",
-            displayChecked,
-            slotIndex
-          );
-          drawCheckboxFieldDirect(
-            page,
-            "checkbox_nivelarBalanca",
-            levelingChecked,
-            slotIndex
-          );
-          drawCheckboxFieldDirect(
-            page,
-            "checkbox_cabos",
-            cablesChecked,
-            slotIndex
-          );
-          drawCheckboxFieldDirect(
-            page,
-            "checkbox_retirarAdesivos",
-            removeAdhesiveChecked,
-            slotIndex
-          );
-          drawCheckboxFieldDirect(
-            page,
-            "checkbox_tampas",
-            coversChecked,
-            slotIndex
-          );
-          drawCheckboxFieldDirect(
-            page,
-            "checkbox_limpezaBalanca",
-            cleaningChecked,
-            slotIndex
-          );
-
-          // imagens
+          // Imagens antes/depois
           const beforeFile = document.getElementById(`fotoAntes_${idx}`)
             ?.files[0];
           const afterFile = document.getElementById(`fotoDepois_${idx}`)
             ?.files[0];
           const before64 = beforeFile ? await fileToBase64(beforeFile) : null;
           const after64 = afterFile ? await fileToBase64(afterFile) : null;
-
           await drawImageSlot(
             page,
             "before_cleaning",
@@ -829,34 +778,29 @@ function createChecklistItem(index, idSuffix, labelText) {
             slotIndex
           );
 
-          // assinatura
+          // Assinaturas
           const canvasResp = document.getElementById(
             `signatureCanvasResponsavel_${idx}`
           );
           const canvasTi = document.getElementById(`signatureCanvasTi_${idx}`);
+          const respData =
+            canvasResp && canvasResp.toDataURL() !== "data:,"
+              ? canvasResp.toDataURL().split(",")[1]
+              : null;
+          const tiData =
+            canvasTi && canvasTi.toDataURL() !== "data:,"
+              ? canvasTi.toDataURL().split(",")[1]
+              : null;
+          await drawSignature(page, "signatureSector", respData, slotIndex);
+          await drawSignature(page, "signatureTi", tiData, slotIndex);
 
-          let sigRespData = null;
-          if (canvasResp) {
-            const dataURL = canvasResp.toDataURL();
-            if (dataURL !== "data:,") sigRespData = dataURL.split(",")[1];
-          }
-
-          let sigTiData = null;
-          if (canvasTi) {
-            const dataURL = canvasTi.toDataURL();
-            if (dataURL !== "data:,") sigTiData = dataURL.split(",")[1];
-          }
-
-          // assinatura Responsável
-          await drawSignatureSector(page, sigRespData, slotIndex);
-          // assinatura TI
-          await drawSignatureTi(page, sigTiData, slotIndex);
+          // Atualiza controles
+          slotIndex += 1;
+          previousSector = sectorValue;
         }
 
-        // 6) Flatten para fixar tudo e evitar sobreposição de campos em branco
+        // Finaliza: fixa campos e dispara download
         form.flatten();
-
-        // 7) Salva e dispara download
         const pdfBytes = await pdfDoc.save();
         const blob = new Blob([pdfBytes], { type: "application/pdf" });
         const url = URL.createObjectURL(blob);

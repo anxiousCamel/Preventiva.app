@@ -17,6 +17,14 @@
           "numero": "65",
           "serie": "002050",
           "patrimonio": "21631"
+        },
+        {
+          "id": 1745587671691,
+          "setor": "rotisseria",
+          "tipo": "balanca_setor",
+          "numero": "99",
+          "serie": "++",
+          "patrimonio": "++"
         }
       ],
       "frios": [
@@ -27,6 +35,24 @@
           "numero": "61",
           "serie": "106535257",
           "patrimonio": "5103"
+        },
+        {
+          "id": 1745577424477,
+          "setor": "frios",
+          "tipo": "balanca_setor",
+          "numero": "22",
+          "serie": "--",
+          "patrimonio": "--"
+        }
+      ],
+      "hortifruti": [
+        {
+          "id": 1745577355629,
+          "setor": "hortifruti",
+          "tipo": "balanca_setor",
+          "numero": "15",
+          "serie": "--",
+          "patrimonio": "--"
         }
       ]
     },
