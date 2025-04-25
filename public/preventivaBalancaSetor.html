@@ -202,7 +202,7 @@
       // Recupera os dados dos equipamentos armazenados no sessionStorage
       const equipamentosData = sessionStorage.getItem("equipamentosData");
       const carouselContainer = document.getElementById("carouselContainer");
-    
+
       /**
        * Mostra a pré-visualização da imagem.
        * @param {HTMLInputElement} fileInput - O input de arquivo
@@ -212,7 +212,7 @@
         const file = fileInput.files[0];
         if (file) {
           const reader = new FileReader();
-          reader.onload = e => {
+          reader.onload = (e) => {
             previewImg.src = e.target.result;
             previewImg.style.display = "block";
           };
@@ -221,21 +221,21 @@
           previewImg.style.display = "none";
         }
       }
-    
+
       // checklist options: idSuffix e labelText
       const CHECKLIST_OPTIONS = [
-        { idSuffix: "limparCabecote",  labelText: "Limpar cabeçote" },
-        { idSuffix: "testeImpressao",  labelText: "Teste de impressão" },
-        { idSuffix: "pesoBalanca",     labelText: "Peso da balança" },
-        { idSuffix: "teclado",         labelText: "Teclado" },
-        { idSuffix: "display",         labelText: "Display" },
-        { idSuffix: "nivelarBalanca",  labelText: "Nivelar balança" },
-        { idSuffix: "cabos",           labelText: "Cabos" },
-        { idSuffix: "retirarAdesivo",  labelText: "Retirar adesivo e outros" },
-        { idSuffix: "tampas",          labelText: "Tampas" },
-        { idSuffix: "limpezaBalanca",  labelText: "Limpeza da balança" },
+        { idSuffix: "limparCabecote", labelText: "Limpar cabeçote" },
+        { idSuffix: "testeImpressao", labelText: "Teste de impressão" },
+        { idSuffix: "pesoBalanca", labelText: "Peso da balança" },
+        { idSuffix: "teclado", labelText: "Teclado" },
+        { idSuffix: "display", labelText: "Display" },
+        { idSuffix: "nivelarBalanca", labelText: "Nivelar balança" },
+        { idSuffix: "cabos", labelText: "Cabos" },
+        { idSuffix: "retirarAdesivo", labelText: "Retirar adesivo e outros" },
+        { idSuffix: "tampas", labelText: "Tampas" },
+        { idSuffix: "limpezaBalanca", labelText: "Limpeza da balança" },
       ];
-    
+
       /**
        * Gera o HTML de um item do checklist com Gooey Checkbox.
        * @param {number} slideIndex – índice do slide para ID único
@@ -260,10 +260,10 @@
           </div>
         `;
       }
-    
+
       if (equipamentosData) {
         const equipamentos = JSON.parse(equipamentosData);
-    
+
         // Ordena índices por setor (alfabético)
         const sortedIndices = equipamentos
           .map((_, idx) => idx)
@@ -272,32 +272,40 @@
             const sectorB = (equipamentos[b].setor || "").toLowerCase();
             return sectorA.localeCompare(sectorB) || a - b;
           });
-    
+
         let lastSector = null;
         sortedIndices.forEach((originalIdx, sortedIdx) => {
           const equipamento = equipamentos[originalIdx];
           const thisSector = (equipamento.setor || "").toLowerCase();
           const slide = document.createElement("div");
           slide.classList.add("slide");
-    
+
           const form = document.createElement("form");
           form.id = `preventiveForm_${sortedIdx}`;
           form.action = "/savePreventiva";
           form.method = "post";
           form.enctype = "multipart/form-data";
-    
+
           // HTML base
           let html = `
             <fieldset>
               <legend>Dados da Balança ${sortedIdx + 1}</legend>
               <div><label for="numero_${sortedIdx}">Número:</label>
-                   <input type="text" id="numero_${sortedIdx}" name="numero" readonly value="${equipamento.numero || ""}"></div>
+                   <input type="text" id="numero_${sortedIdx}" name="numero" readonly value="${
+            equipamento.numero || ""
+          }"></div>
               <div><label for="setor_${sortedIdx}">Setor:</label>
-                   <input type="text" id="setor_${sortedIdx}" name="setor" readonly value="${equipamento.setor || ""}"></div>
+                   <input type="text" id="setor_${sortedIdx}" name="setor" readonly value="${
+            equipamento.setor || ""
+          }"></div>
               <div><label for="serie_${sortedIdx}">Série:</label>
-                   <input type="text" id="serie_${sortedIdx}" name="serie" readonly value="${equipamento.serie || ""}"></div>
+                   <input type="text" id="serie_${sortedIdx}" name="serie" readonly value="${
+            equipamento.serie || ""
+          }"></div>
               <div><label for="patrimonio_${sortedIdx}">Patrimônio:</label>
-                   <input type="text" id="patrimonio_${sortedIdx}" name="patrimonio" readonly value="${equipamento.patrimonio || ""}"></div>
+                   <input type="text" id="patrimonio_${sortedIdx}" name="patrimonio" readonly value="${
+            equipamento.patrimonio || ""
+          }"></div>
             </fieldset>
     
             <fieldset>
@@ -308,8 +316,17 @@
     
             <fieldset>
               <legend>Checklist</legend>
-              ${CHECKLIST_OPTIONS.map(opt => createChecklistItem(sortedIdx, opt.idSuffix, opt.labelText)).join('')}
+              <div style="margin-bottom:8px;">
+                <label>
+                  <input type="checkbox" id="checkAll_${sortedIdx}" data-slide-index="${sortedIdx}">
+                  Marcar todos
+                </label>
+              </div>
+              ${CHECKLIST_OPTIONS.map((opt) =>
+                createChecklistItem(sortedIdx, opt.idSuffix, opt.labelText)
+              ).join("")}
             </fieldset>
+
     
             <fieldset>
               <legend>Fotos Depois</legend>
@@ -322,7 +339,7 @@
               <textarea id="observacoes_${sortedIdx}" name="observacoes" rows="4" style="width:100%;" placeholder="Digite observações..."></textarea>
             </fieldset>
           `;
-    
+
           // Adiciona assinaturas apenas no primeiro slide de cada setor
           if (sortedIdx === 0 || thisSector !== lastSector) {
             html += `
@@ -354,24 +371,63 @@
             `;
           }
           lastSector = thisSector;
-    
+
           form.innerHTML = html;
           slide.appendChild(form);
           carouselContainer.appendChild(slide);
-    
+
           // configura previews
-          form.querySelector(`#fotoAntes_${sortedIdx}`)
-              .addEventListener('change', e => previewImage(e.target, form.querySelector(`#previewFotoAntes_${sortedIdx}`)));
-          form.querySelector(`#fotoDepois_${sortedIdx}`)
-              .addEventListener('change', e => previewImage(e.target, form.querySelector(`#previewFotoDepois_${sortedIdx}`)));
+          form
+            .querySelector(`#fotoAntes_${sortedIdx}`)
+            .addEventListener("change", (e) =>
+              previewImage(
+                e.target,
+                form.querySelector(`#previewFotoAntes_${sortedIdx}`)
+              )
+            );
+          form
+            .querySelector(`#fotoDepois_${sortedIdx}`)
+            .addEventListener("change", (e) =>
+              previewImage(
+                e.target,
+                form.querySelector(`#previewFotoDepois_${sortedIdx}`)
+              )
+            );
         });
       } else {
-        alert("Dados do equipamento não encontrados. Inicie a preventiva novamente.");
+        alert(
+          "Dados do equipamento não encontrados. Inicie a preventiva novamente."
+        );
       }
+
+     // Função para marcar/desmarcar todos os checkboxes
+function toggleAllCheckboxes(slideIndex) {
+  const checkboxes = document.querySelectorAll(`#preventiveForm_${slideIndex} input[type="checkbox"]:not(#checkAll_${slideIndex})`);
+  const checkAllCheckbox = document.getElementById(`checkAll_${slideIndex}`);
+
+  // Verifica se todos os checkboxes estão marcados
+  const allChecked = Array.from(checkboxes).every((checkbox) => checkbox.checked);
+
+  // Marca/desmarca todos os checkboxes
+  checkboxes.forEach((checkbox) => {
+    checkbox.checked = !allChecked;
+  });
+
+  // Atualiza o estado do "Marcar todos"
+  checkAllCheckbox.checked = !allChecked;
+}
+
+// Adiciona o evento ao "Marcar todos"
+document.addEventListener('DOMContentLoaded', () => {
+  const checkAllCheckboxes = document.querySelectorAll('input[type="checkbox"][id^="checkAll_"]');
+  checkAllCheckboxes.forEach((checkbox) => {
+    checkbox.addEventListener('click', (event) => {
+      const slideIndex = event.target.getAttribute('data-slide-index');
+      toggleAllCheckboxes(slideIndex);
+    });
+  });
+});
     </script>
-    
-    
-    
 
     <script>
       // Função para habilitar a área de assinatura em um canvas
