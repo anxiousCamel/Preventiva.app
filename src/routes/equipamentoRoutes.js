@@ -1,15 +1,24 @@
-// src/routes/equipamentoRoutes.js
-
 import express from 'express';
-import { listarEquipamentos, cadastrarEquipamento, listarEquipamentosPorLojaETipo } from '../controllers/equipamentoController.js';
-
+import {
+  filterEquipments,   // novo controlador para filtros genéricos
+  cadastrarEquipamento,
+  listarEquipamentosPorLojaETipo,
+  deleteEquipment, 
+  editEquipment     
+} from '../controllers/equipamentoController.js';
 
 const router = express.Router();
 
-// Rota para cadastrar um novo equipamento
+// Rota geral de listagem/filtros: GET /equipamentos?loja=&tipo=&setor=
+router.get('/', filterEquipments);
+
+// Rotas legadas
+router.get('/:loja/:tipo', listarEquipamentosPorLojaETipo);
 router.post('/', cadastrarEquipamento);
 
-// Rota para lista equipamentos por loja e tipo
-router.get('/:loja/:tipo', listarEquipamentosPorLojaETipo);
+// NOVAS rotas para delete e edit
+router.delete('/:id', deleteEquipment);
+router.put('/:id',    editEquipment);
+
 
 export default router;

@@ -84,8 +84,61 @@ async function getEquipamentosPorLojaETipo(loja, tipo) {
   return equipamentosEncontrados;
 }
 
+/**
+ * Remove um equipamento pelo ID (loja e setor são iterados para achar o item).
+ * @param {number} id 
+ * @returns {boolean} true se excluiu, false se não encontrou
+ */
+export async function removeEquipamentoById(id) {
+  await initDB();
+  let removed = false;
+
+  Object.entries(db.data.lojas).forEach(([storeKey, sectors]) => {
+    Object.entries(sectors).forEach(([sectorKey, items]) => {
+      const index = items.findIndex(item => item.id === id);
+      if (index !== -1) {
+        items.splice(index, 1);
+        removed = true;
+      }
+    });
+  });
+
+  if (removed) await db.write();
+  return removed;
+}
+
+/**
+ * Atualiza um equipamento existente pelo ID.
+ * Só sobrescreve os campos informados em `updatedFields`.
+ * @param {number} id 
+ * @param {object} updatedFields 
+ * @returns {object|null} equipamento atualizado ou null se não encontrado
+ */
+export async function updateEquipamentoById(id, updatedFields) {
+  await initDB();
+  let updatedEquip = null;
+
+  Object.entries(db.data.lojas).forEach(([storeKey, sectors]) => {
+    Object.entries(sectors).forEach(([sectorKey, items]) => {
+      items.forEach((item, idx) => {
+        if (item.id === id) {
+          const merged = { ...item, ...updatedFields };
+          db.data.lojas[storeKey][sectorKey][idx] = merged;
+          updatedEquip = merged;
+        }
+      });
+    });
+  });
+
+  if (updatedEquip) await db.write();
+  return updatedEquip;
+}
+
+
 export default {
   addEquipamento,
   getAllEquipamentos,
-  getEquipamentosPorLojaETipo
+  getEquipamentosPorLojaETipo,
+  removeEquipamentoById,
+  updateEquipamentoById
 };
