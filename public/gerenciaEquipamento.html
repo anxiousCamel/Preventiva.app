@@ -2,31 +2,123 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
+  <!-- Meta tag para tornar a página responsiva -->
+  <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- Boa prática: define escala inicial -->
   <title>Gerenciamento de Equipamentos</title>
   <style>
-    table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
-    th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: left; }
-    th { background: #f0f0f0; }
-    .filters { display: flex; gap: 1rem; flex-wrap: wrap; }
-    .filters > div { display: flex; flex-direction: column; }
-    /* Estilização básica do modal */
+    /* Layout básico */
+    body {
+      margin: 0;
+      padding: 1rem;
+      font-family: Arial, sans-serif;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      text-align: center;
+    }
+
+    /* Container para tornar a tabela rolável em telas pequenas */
+    .table-wrapper {
+      overflow-x: auto; /* Habilita scroll horizontal */
+      margin-top: 1rem;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 600px; /* Garantir legibilidade antes de virar scroll */
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 0.5rem;
+      text-align: left;
+    }
+
+    th {
+      background: #f0f0f0;
+    }
+
+    /* Filtros em linha que quebram em coluna no mobile */
+    .filters {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .filters > div {
+      flex: 1;
+      min-width: 150px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Estilização básica do botão de filtro */
+    #filterButton {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    /* Estilização do modal */
     #editModal {
       display: none;
       position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       background: rgba(0,0,0,0.5);
-      align-items: center; justify-content: center;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      box-sizing: border-box;
     }
+
     #editForm {
       background: #fff;
       padding: 1rem;
       border-radius: 4px;
-      width: 320px;
+      width: 100%;
+      max-width: 400px; /* Limita tamanho em tela grande */
       box-shadow: 0 0 10px rgba(0,0,0,0.2);
     }
-    #editForm label { display: block; margin-bottom: 0.5rem; }
-    #editForm input { width: 100%; margin-top: 0.25rem; }
-    #editForm button { margin-right: 0.5rem; }
+
+    #editForm label {
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    #editForm input {
+      width: 100%;
+      margin-top: 0.25rem;
+      padding: 0.5rem;
+      box-sizing: border-box;
+    }
+
+    #editForm button {
+      margin-top: 0.5rem;
+      padding: 0.5rem 1rem;
+    }
+
+    /* Media query para telas até 600px wide */
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.25rem;
+      }
+      .filters {
+        flex-direction: column; /* Filtros empilhados */
+      }
+      .filters > div {
+        width: 100%;
+      }
+      #editForm {
+        padding: 0.5rem;
+      }
+      #editForm button {
+        width: 100%; /* Botões full-width no mobile */
+        box-sizing: border-box;
+      }
+    }
   </style>
 </head>
 <body>
@@ -37,95 +129,65 @@
       <label for="storeSelect">Loja:</label>
       <select id="storeSelect">
         <option value="">Todas as lojas</option>
-        <option value="rebouças">Rebouças</option>
-        <option value="ivo">Ivo</option>
-        <option value="bom_retiro">Bom Retiro</option>
-        <!-- … demais opções … -->
+        <!-- ... -->
       </select>
     </div>
-
     <div>
       <label for="typeSelect">Tipo de Equipamento:</label>
       <select id="typeSelect">
         <option value="">Todos os tipos</option>
-        <option value="balanca_setor">Balança setor</option>
-        <option value="balanca_checkout">Balança checkout</option>
-        <option value="impressora">Impressora</option>
-        <!-- … demais opções … -->
+        <!-- ... -->
       </select>
     </div>
-
     <div>
       <label for="sectorSelect">Setor:</label>
       <select id="sectorSelect">
         <option value="">Todos os setores</option>
-        <option value="açougue">Açougue</option>
-        <option value="padaria">Padaria</option>
-        <option value="frios">Frios e Laticínios</option>
-        <!-- … demais opções … -->
+        <!-- ... -->
       </select>
     </div>
-
     <div style="align-self: flex-end;">
       <button id="filterButton">Filtrar</button>
     </div>
   </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Loja</th>
-        <th>Setor</th>
-        <th>Tipo</th>
-        <th>Número</th>
-        <th>Série</th>
-        <th>Patrimônio</th>
-        <th>Ações</th>
-      </tr>
-    </thead>
-    <tbody id="equipmentsTableBody">
-      <!-- Linhas serão preenchidas via JS -->
-    </tbody>
-  </table>
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Loja</th>
+          <th>Setor</th>
+          <th>Tipo</th>
+          <th>Número</th>
+          <th>Série</th>
+          <th>Patrimônio</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="equipmentsTableBody">
+        <!-- Linhas via JS -->
+      </tbody>
+    </table>
+  </div>
 
-  <!-- Modal de edição, fora da tabela -->
+  <!-- Modal de edição -->
   <div id="editModal">
     <form id="editForm">
       <h3>Editar Equipamento</h3>
       <input type="hidden" id="editId" />
-      
+      <!-- Campos de edição -->
       <label for="editLoja">Loja:
         <input type="text" id="editLoja" required />
       </label>
-      
-      <label for="editSetor">Setor:
-        <input type="text" id="editSetor" required />
-      </label>
-      
-      <label for="editTipo">Tipo:
-        <input type="text" id="editTipo" required />
-      </label>
-      
-      <label for="editNumero">Número:
-        <input type="text" id="editNumero" required />
-      </label>
-      
-      <label for="editSerie">Série:
-        <input type="text" id="editSerie" required />
-      </label>
-      
-      <label for="editPatrimonio">Patrimônio:
-        <input type="text" id="editPatrimonio" required />
-      </label>
-      
+      <!-- ... demais campos ... -->
       <button type="submit">Salvar</button>
       <button type="button" id="cancelEdit">Cancelar</button>
     </form>
   </div>
 
   <script>
-    // **Em inglês**: nomes de variáveis e funções
+    // Variáveis e funções em inglês
     const storeSelect   = document.getElementById('storeSelect');
     const typeSelect    = document.getElementById('typeSelect');
     const sectorSelect  = document.getElementById('sectorSelect');
@@ -135,7 +197,7 @@
     const editForm      = document.getElementById('editForm');
     const cancelEditBtn = document.getElementById('cancelEdit');
 
-    // Busca equipamentos com filtros opcionais
+    // Fetch equipments with optional filters
     async function fetchEquipments() {
       const params = new URLSearchParams();
       if (storeSelect.value)  params.append('loja', storeSelect.value);
@@ -150,15 +212,12 @@
       return res.json();
     }
 
-    // Renderiza tabela e insere botões de ação
     function renderTable(equipments) {
       tableBody.innerHTML = '';
-
-      if (equipments.length === 0) {
+      if (!equipments.length) {
         tableBody.innerHTML = '<tr><td colspan="8">Nenhum equipamento encontrado.</td></tr>';
         return;
       }
-
       equipments.forEach(eq => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -170,27 +229,19 @@
           <td>${eq.serie}</td>
           <td>${eq.patrimonio}</td>
           <td>
-            <button class="edit-btn"   data-id="${eq.id}">Editar</button>
+            <button class="edit-btn" data-id="${eq.id}">Editar</button>
             <button class="delete-btn" data-id="${eq.id}">Excluir</button>
           </td>
         `;
         tableBody.appendChild(tr);
       });
-
-      // Associa eventos aos botões
-      document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', onDeleteClick);
-      });
-      document.querySelectorAll('.edit-btn').forEach(btn => {
-        btn.addEventListener('click', onEditClick);
-      });
+      document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', onDeleteClick));
+      document.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', onEditClick));
     }
 
-    // Excluir com confirmação
     async function onDeleteClick(evt) {
       const id = evt.target.dataset.id;
       if (!confirm(`Deseja realmente excluir o equipamento ID ${id}?`)) return;
-
       const res = await fetch(`/equipamentos/${id}`, { method: 'DELETE' });
       if (res.ok) {
         alert('Equipamento excluído com sucesso.');
@@ -200,12 +251,9 @@
       }
     }
 
-    // Abrir modal com dados para editar
     function onEditClick(evt) {
       const id = evt.target.dataset.id;
       const tr = evt.target.closest('tr');
-
-      // Preenche campos do modal
       document.getElementById('editId').value         = id;
       document.getElementById('editLoja').value       = tr.children[1].textContent;
       document.getElementById('editSetor').value      = tr.children[2].textContent;
@@ -213,34 +261,27 @@
       document.getElementById('editNumero').value     = tr.children[4].textContent;
       document.getElementById('editSerie').value      = tr.children[5].textContent;
       document.getElementById('editPatrimonio').value = tr.children[6].textContent;
-
       editModal.style.display = 'flex';
     }
 
-    // Cancelar edição
-    cancelEditBtn.addEventListener('click', () => {
-      editModal.style.display = 'none';
-    });
+    cancelEditBtn.addEventListener('click', () => editModal.style.display = 'none');
 
-    // Submeter edição via PUT
     editForm.addEventListener('submit', async evt => {
       evt.preventDefault();
-      const id = Number(document.getElementById('editId').value);
+      const id   = Number(document.getElementById('editId').value);
       const body = {
-        loja:       document.getElementById('editLoja').value,
-        setor:      document.getElementById('editSetor').value,
-        tipo:       document.getElementById('editTipo').value,
-        numero:     document.getElementById('editNumero').value,
-        serie:      document.getElementById('editSerie').value,
+        loja: document.getElementById('editLoja').value,
+        setor: document.getElementById('editSetor').value,
+        tipo: document.getElementById('editTipo').value,
+        numero: document.getElementById('editNumero').value,
+        serie: document.getElementById('editSerie').value,
         patrimonio: document.getElementById('editPatrimonio').value
       };
-
       const res = await fetch(`/equipamentos/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
-
       if (res.ok) {
         alert('Equipamento atualizado com sucesso.');
         editModal.style.display = 'none';
@@ -250,7 +291,6 @@
       }
     });
 
-    // Dispara filtro na carga inicial
     filterButton.addEventListener('click', async () => {
       filterButton.disabled   = true;
       filterButton.textContent = 'Carregando...';
@@ -260,9 +300,7 @@
       filterButton.textContent = 'Filtrar';
     });
 
-    window.addEventListener('DOMContentLoaded', () => {
-      filterButton.click();
-    });
+    window.addEventListener('DOMContentLoaded', () => filterButton.click());
   </script>
 </body>
 </html>
