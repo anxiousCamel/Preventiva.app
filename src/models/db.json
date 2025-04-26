@@ -1,9 +1,160 @@
 {
   "lojas": {
     "maria_antonia": {
-      "rotisseria": [],
-      "frios": [],
-      "hortifruti": []
+      "rotisseria": [
+        {
+          "id": 1745663596363,
+          "setor": "rotisseria",
+          "tipo": "balanca_setor",
+          "numero": "60",
+          "serie": "10653254",
+          "patrimonio": "4882"
+        },
+        {
+          "id": 1745663615812,
+          "setor": "rotisseria",
+          "tipo": "balanca_setor",
+          "numero": "65",
+          "serie": "002050",
+          "patrimonio": "21631"
+        }
+      ],
+      "frios": [
+        {
+          "id": 1745663637324,
+          "setor": "frios",
+          "tipo": "balanca_setor",
+          "numero": "61",
+          "serie": "1065325257",
+          "patrimonio": "5103"
+        },
+        {
+          "id": 1745663656366,
+          "setor": "frios",
+          "tipo": "balanca_setor",
+          "numero": "41",
+          "serie": "10653254",
+          "patrimonio": "4878"
+        },
+        {
+          "id": 1745663684950,
+          "setor": "frios",
+          "tipo": "balanca_setor",
+          "numero": "15",
+          "serie": "10744737",
+          "patrimonio": "6884"
+        },
+        {
+          "id": 1745663698773,
+          "setor": "frios",
+          "tipo": "balanca_setor",
+          "numero": "23",
+          "serie": "10653250",
+          "patrimonio": "5052"
+        }
+      ],
+      "hortifruti": [
+        {
+          "id": 1745663786822,
+          "setor": "hortifruti",
+          "tipo": "balanca_setor",
+          "numero": "31",
+          "serie": "10653259",
+          "patrimonio": "---"
+        },
+        {
+          "id": 1745663808776,
+          "setor": "hortifruti",
+          "tipo": "balanca_setor",
+          "numero": "51",
+          "serie": "10653248",
+          "patrimonio": "4794"
+        },
+        {
+          "id": 1745663826670,
+          "setor": "hortifruti",
+          "tipo": "balanca_setor",
+          "numero": "43",
+          "serie": "10653251",
+          "patrimonio": "4881"
+        },
+        {
+          "id": 1745663840118,
+          "setor": "hortifruti",
+          "tipo": "balanca_setor",
+          "numero": "16",
+          "serie": "10740032",
+          "patrimonio": "6883"
+        }
+      ],
+      "padaria": [
+        {
+          "id": 1745663730198,
+          "setor": "padaria",
+          "tipo": "balanca_setor",
+          "numero": "34",
+          "serie": "10744755",
+          "patrimonio": "1161"
+        },
+        {
+          "id": 1745663744582,
+          "setor": "padaria",
+          "tipo": "balanca_setor",
+          "numero": "45",
+          "serie": "10653244",
+          "patrimonio": "4875"
+        },
+        {
+          "id": 1745663765909,
+          "setor": "padaria",
+          "tipo": "balanca_setor",
+          "numero": "22",
+          "serie": "10653253",
+          "patrimonio": "9279"
+        }
+      ],
+      "açougue": [
+        {
+          "id": 1745663857681,
+          "setor": "açougue",
+          "tipo": "balanca_setor",
+          "numero": "64",
+          "serie": "10653260",
+          "patrimonio": "----"
+        },
+        {
+          "id": 1745663868453,
+          "setor": "açougue",
+          "tipo": "balanca_setor",
+          "numero": "52",
+          "serie": "10653252",
+          "patrimonio": "4795"
+        },
+        {
+          "id": 1745663880261,
+          "setor": "açougue",
+          "tipo": "balanca_setor",
+          "numero": "42",
+          "serie": "10653256",
+          "patrimonio": "4880"
+        },
+        {
+          "id": 1745663898675,
+          "setor": "açougue",
+          "tipo": "balanca_setor",
+          "numero": "44",
+          "serie": "10653246",
+          "patrimonio": "5107"
+        },
+        {
+          "id": 1745663910233,
+          "setor": "açougue",
+          "tipo": "balanca_setor",
+          "numero": "21",
+          "serie": "10653253",
+          "patrimonio": "----"
+        }
+      ]
     },
     "mogi_guacu": {
       "padaria": []
