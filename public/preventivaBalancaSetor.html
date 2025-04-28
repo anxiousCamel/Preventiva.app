@@ -356,7 +356,7 @@
                 <p>Assinatura:</p>
                 <canvas id="signatureCanvasResponsavel_${sortedIdx}" width="300" height="150" style="border:1px solid #ccc;"></canvas><br>
                 <button type="button" onclick="clearSignature('Responsavel', ${sortedIdx})">Limpar</button>
-                <input type="hidden" id="assinaturaInputResponsavel_${sortedIdx}" name="assinaturaResponsavel">
+                <input type="hidden" id="assinaturaInputResponsavel_${sortedIdx}" name="assinaturaResponsavel"   value="">
               </fieldset>
     
               <fieldset>
@@ -366,33 +366,141 @@
                 <p>Assinatura:</p>
                 <canvas id="signatureCanvasTi_${sortedIdx}" width="300" height="150" style="border:1px solid #ccc;"></canvas><br>
                 <button type="button" onclick="clearSignature('Ti', ${sortedIdx})">Limpar</button>
-                <input type="hidden" id="assinaturaInputTi_${sortedIdx}" name="assinaturaTi">
+                <input type="hidden" id="assinaturaInputTi_${sortedIdx}" name="assinaturaTi" value="">
               </fieldset>
             `;
           }
           lastSector = thisSector;
 
+          /**
+           * Salva o estado do slide `idx` no localStorage
+           */
+          function saveSlideState(idx) {
+            const form = document.getElementById(`preventiveForm_${idx}`);
+            if (!form) return;
+
+            // Objeto que vai conter todos os valores
+            const state = {
+              text: {},
+              check: {},
+              images: {},
+              textarea: {},
+              signatures: {},
+            };
+
+            // Campos de texto e select
+            form
+              .querySelectorAll('input[type="text"], select')
+              .forEach((el) => {
+                state.text[el.id] = el.value;
+              });
+
+            // Textareas
+            form.querySelectorAll("textarea").forEach((el) => {
+              state.textarea[el.id] = el.value;
+            });
+
+            // Checkboxes
+            form.querySelectorAll('input[type="checkbox"]').forEach((el) => {
+              state.check[el.id] = el.checked;
+            });
+
+            // Imagens (usar prévia já carregada)
+            ["Antes", "Depois"].forEach((type) => {
+              const preview = document.getElementById(
+                `previewFoto${type}_${idx}`
+              );
+              if (preview && preview.src) {
+                state.images[`foto${type}_${idx}`] = preview.src;
+              }
+            });
+
+            // Assinaturas (canvas -> DataURL)
+            ["Responsavel", "Ti"].forEach((role) => {
+              const canvas = document.getElementById(
+                `signatureCanvas${role}_${idx}`
+              );
+              if (canvas) {
+                state.signatures[canvas.id] = canvas.toDataURL();
+              }
+            });
+
+            // Grava no localStorage
+            localStorage.setItem(
+              `preventiva_state_${idx}`,
+              JSON.stringify(state)
+            );
+          }
+
+          // Associa listeners
+          document
+            .querySelectorAll("form[id^='preventiveForm_']")
+            .forEach((form) => {
+              const idx = form.id.split("_")[1];
+
+              // Textos e selects
+              form
+                .querySelectorAll('input[type="text"], select, textarea')
+                .forEach((el) =>
+                  el.addEventListener("input", () => saveSlideState(idx))
+                );
+
+              // Checkboxes
+              form
+                .querySelectorAll('input[type="checkbox"]')
+                .forEach((el) =>
+                  el.addEventListener("change", () => saveSlideState(idx))
+                );
+
+              // Arquivos (imagens)
+              form.querySelectorAll('input[type="file"]').forEach((el) => {
+                el.addEventListener("change", async () => {
+                  const file = el.files[0];
+                  if (!file) return;
+                  const dataUrl = await fileToBase64(file);
+                  // Ajusta preview imediatamente
+                  const preview = document.getElementById(
+                    `preview${el.id.replace("foto", "previewFoto")}`
+                  );
+                  if (preview) preview.src = dataUrl;
+                  saveSlideState(idx);
+                });
+              });
+
+              // Canvas de assinatura: após desenho
+              ["Responsavel", "Ti"].forEach((role) => {
+                const canvas = document.getElementById(
+                  `signatureCanvas${role}_${idx}`
+                );
+                if (canvas) {
+                  canvas.addEventListener("mouseup", () => saveSlideState(idx));
+                  canvas.addEventListener("touchend", () =>
+                    saveSlideState(idx)
+                  );
+                }
+              });
+            });
+
           form.innerHTML = html;
-      slide.appendChild(form);
+          slide.appendChild(form);
 
-      // Adiciona botão para navegação ao próximo grupo
-      const nextButton = document.createElement("button");
-      nextButton.type = "button";
-      nextButton.textContent = "Próximo";
-      nextButton.onclick = () => {
-        // Rolando a página para o topo
-        window.scrollTo({ top: 0, behavior: "smooth" });
+          // Adiciona botão para navegação ao próximo grupo
+          const nextButton = document.createElement("button");
+          nextButton.type = "button";
+          nextButton.textContent = "Próximo";
+          nextButton.onclick = () => {
+            // Rolando a página para o topo
+            window.scrollTo({ top: 0, behavior: "smooth" });
 
-        // Mostrando o próximo slide
-        const nextSlide = carouselContainer.children[sortedIdx + 1];
-        if (nextSlide) {
-          nextSlide.scrollIntoView({ behavior: "smooth" });
-        }
-      };
-      form.appendChild(nextButton);
+            // Mostrando o próximo slide
+            const nextSlide = carouselContainer.children[sortedIdx + 1];
+            if (nextSlide) {
+              nextSlide.scrollIntoView({ behavior: "smooth" });
+            }
+          };
+          form.appendChild(nextButton);
 
-      carouselContainer.appendChild(slide);
-
+          carouselContainer.appendChild(slide);
 
           // configura previews
           form
@@ -418,33 +526,41 @@
         );
       }
 
-     // Função para marcar/desmarcar todos os checkboxes
-function toggleAllCheckboxes(slideIndex) {
-  const checkboxes = document.querySelectorAll(`#preventiveForm_${slideIndex} input[type="checkbox"]:not(#checkAll_${slideIndex})`);
-  const checkAllCheckbox = document.getElementById(`checkAll_${slideIndex}`);
+      // Função para marcar/desmarcar todos os checkboxes
+      function toggleAllCheckboxes(slideIndex) {
+        const checkboxes = document.querySelectorAll(
+          `#preventiveForm_${slideIndex} input[type="checkbox"]:not(#checkAll_${slideIndex})`
+        );
+        const checkAllCheckbox = document.getElementById(
+          `checkAll_${slideIndex}`
+        );
 
-  // Verifica se todos os checkboxes estão marcados
-  const allChecked = Array.from(checkboxes).every((checkbox) => checkbox.checked);
+        // Verifica se todos os checkboxes estão marcados
+        const allChecked = Array.from(checkboxes).every(
+          (checkbox) => checkbox.checked
+        );
 
-  // Marca/desmarca todos os checkboxes
-  checkboxes.forEach((checkbox) => {
-    checkbox.checked = !allChecked;
-  });
+        // Marca/desmarca todos os checkboxes
+        checkboxes.forEach((checkbox) => {
+          checkbox.checked = !allChecked;
+        });
 
-  // Atualiza o estado do "Marcar todos"
-  checkAllCheckbox.checked = !allChecked;
-}
+        // Atualiza o estado do "Marcar todos"
+        checkAllCheckbox.checked = !allChecked;
+      }
 
-// Adiciona o evento ao "Marcar todos"
-document.addEventListener('DOMContentLoaded', () => {
-  const checkAllCheckboxes = document.querySelectorAll('input[type="checkbox"][id^="checkAll_"]');
-  checkAllCheckboxes.forEach((checkbox) => {
-    checkbox.addEventListener('click', (event) => {
-      const slideIndex = event.target.getAttribute('data-slide-index');
-      toggleAllCheckboxes(slideIndex);
-    });
-  });
-});
+      // Adiciona o evento ao "Marcar todos"
+      document.addEventListener("DOMContentLoaded", () => {
+        const checkAllCheckboxes = document.querySelectorAll(
+          'input[type="checkbox"][id^="checkAll_"]'
+        );
+        checkAllCheckboxes.forEach((checkbox) => {
+          checkbox.addEventListener("click", (event) => {
+            const slideIndex = event.target.getAttribute("data-slide-index");
+            toggleAllCheckboxes(slideIndex);
+          });
+        });
+      });
     </script>
 
     <script>
@@ -515,18 +631,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // Inicializa a função de assinatura para cada canvas
+      // Inicializa a função de assinatura para cada canvas de assinatura
       window.addEventListener("load", () => {
-        const totalSlides = document.querySelectorAll("canvas").length;
-        for (let i = 0; i < totalSlides; i++) {
-          const canvasResponsavel = document.getElementById(
-            `signatureCanvasResponsavel_${i}`
-          );
-          const canvasTi = document.getElementById(`signatureCanvasTi_${i}`);
-          if (canvasResponsavel)
-            enableSignatureCanvas(canvasResponsavel, i, "Responsavel");
-          if (canvasTi) enableSignatureCanvas(canvasTi, i, "Ti");
-        }
+        // Seleciona todos os <canvas> cujo id começa com "signatureCanvas"
+        document
+          .querySelectorAll("canvas[id^='signatureCanvas']")
+          .forEach((canvas) => {
+            // Usa regex para extrair o papel ("Responsavel" ou "Ti") e o índice do id
+            // Exemplo de id: "signatureCanvasResponsavel_16" ou "signatureCanvasTi_0"
+            const match = canvas.id.match(
+              /^signatureCanvas(Responsavel|Ti)_(\d+)$/
+            );
+            if (!match) return; // pula qualquer canvas que não casou o padrão
+
+            const role = match[1]; // "Responsavel" ou "Ti"
+            const index = Number(match[2]); // 0, 16, etc.
+
+            // Associa todos os eventos de mouse/touch ao canvas correto
+            enableSignatureCanvas(canvas, index, role);
+          });
       });
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
@@ -783,12 +906,20 @@ document.addEventListener('DOMContentLoaded', () => {
           });
 
           // Imagens antes/depois
-          const beforeFile = document.getElementById(`fotoAntes_${idx}`)
-            ?.files[0];
-          const afterFile = document.getElementById(`fotoDepois_${idx}`)
-            ?.files[0];
-          const before64 = beforeFile ? await fileToBase64(beforeFile) : null;
-          const after64 = afterFile ? await fileToBase64(afterFile) : null;
+          // Imagens antes/depois: pega o Data URL do <img> de preview (que vem do localStorage)
+          const previewAntes = document.getElementById(
+            `previewFotoAntes_${idx}`
+          );
+          const before64 =
+            previewAntes && previewAntes.src ? previewAntes.src : null;
+
+          const previewDepois = document.getElementById(
+            `previewFotoDepois_${idx}`
+          );
+          const after64 =
+            previewDepois && previewDepois.src ? previewDepois.src : null;
+
+          // Desenha as imagens no PDF usando os Data URLs
           await drawImageSlot(
             page,
             "before_cleaning",
@@ -796,6 +927,7 @@ document.addEventListener('DOMContentLoaded', () => {
             { x: 50, y: 400, width: 200, height: 150 },
             slotIndex
           );
+
           await drawImageSlot(
             page,
             "after_cleaning",
@@ -834,7 +966,70 @@ document.addEventListener('DOMContentLoaded', () => {
         a.href = url;
         a.download = "preventivas_preenchidas.pdf";
         a.click();
+        clearSavedState();
       }
+
+      function clearSavedState() {
+        document
+          .querySelectorAll("form[id^='preventiveForm_']")
+          .forEach((form) => {
+            const idx = form.id.split("_")[1];
+            localStorage.removeItem(`preventiva_state_${idx}`);
+          });
+      }
+    </script>
+    <script>
+      window.addEventListener("DOMContentLoaded", () => {
+        document
+          .querySelectorAll("form[id^='preventiveForm_']")
+          .forEach((form) => {
+            const idx = form.id.split("_")[1];
+            const raw = localStorage.getItem(`preventiva_state_${idx}`);
+            if (!raw) return;
+
+            const state = JSON.parse(raw);
+
+            // Restaurar textos e selects
+            Object.entries(state.text || {}).forEach(([id, val]) => {
+              const el = document.getElementById(id);
+              if (el) el.value = val;
+            });
+            Object.entries(state.textarea || {}).forEach(([id, val]) => {
+              const el = document.getElementById(id);
+              if (el) el.value = val;
+            });
+
+            // Restaurar checkboxes
+            Object.entries(state.check || {}).forEach(([id, checked]) => {
+              const el = document.getElementById(id);
+              if (el) el.checked = checked;
+            });
+
+            // Restaurar imagens
+            Object.entries(state.images || {}).forEach(([id, src]) => {
+              const preview = document.getElementById(
+                `preview${id.replace("foto", "Foto")}`
+              );
+              if (preview) {
+                preview.src = src;
+                preview.style.display = "block";
+              }
+            });
+
+            // Restaurar assinaturas
+            Object.entries(state.signatures || {}).forEach(
+              ([canvasId, dataUrl]) => {
+                const canvas = document.getElementById(canvasId);
+                if (canvas) {
+                  const ctx = canvas.getContext("2d");
+                  const img = new Image();
+                  img.onload = () => ctx.drawImage(img, 0, 0);
+                  img.src = dataUrl;
+                }
+              }
+            );
+          });
+      });
     </script>
   </body>
 </html>
