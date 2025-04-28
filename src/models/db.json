@@ -1,10 +1,10 @@
 {
   "lojas": {
     "maria_antonia": {
-      "rotisseria": [
+      "Rotisseria": [
         {
           "id": 1745663596363,
-          "setor": "rotisseria",
+          "setor": "Rotisseria",
           "tipo": "balanca_setor",
           "numero": "60",
           "serie": "10653254",
@@ -12,17 +12,17 @@
         },
         {
           "id": 1745663615812,
-          "setor": "rotisseria",
+          "setor": "Rotisseria",
           "tipo": "balanca_setor",
           "numero": "65",
           "serie": "002050",
           "patrimonio": "21631"
         }
       ],
-      "frios": [
+      "Frios": [
         {
           "id": 1745663637324,
-          "setor": "frios",
+          "setor": "Frios",
           "tipo": "balanca_setor",
           "numero": "61",
           "serie": "1065325257",
@@ -30,7 +30,7 @@
         },
         {
           "id": 1745663656366,
-          "setor": "frios",
+          "setor": "Frios",
           "tipo": "balanca_setor",
           "numero": "41",
           "serie": "10653254",
@@ -38,7 +38,7 @@
         },
         {
           "id": 1745663684950,
-          "setor": "frios",
+          "setor": "Frios",
           "tipo": "balanca_setor",
           "numero": "15",
           "serie": "10744737",
@@ -46,17 +46,17 @@
         },
         {
           "id": 1745663698773,
-          "setor": "frios",
+          "setor": "Frios",
           "tipo": "balanca_setor",
           "numero": "23",
           "serie": "10653250",
           "patrimonio": "5052"
         }
       ],
-      "hortifruti": [
+      "Hortifruti": [
         {
           "id": 1745663786822,
-          "setor": "hortifruti",
+          "setor": "Hortifruti",
           "tipo": "balanca_setor",
           "numero": "31",
           "serie": "10653259",
@@ -64,7 +64,7 @@
         },
         {
           "id": 1745663808776,
-          "setor": "hortifruti",
+          "setor": "Hortifruti",
           "tipo": "balanca_setor",
           "numero": "51",
           "serie": "10653248",
@@ -72,7 +72,7 @@
         },
         {
           "id": 1745663826670,
-          "setor": "hortifruti",
+          "setor": "Hortifruti",
           "tipo": "balanca_setor",
           "numero": "43",
           "serie": "10653251",
@@ -80,17 +80,17 @@
         },
         {
           "id": 1745663840118,
-          "setor": "hortifruti",
+          "setor": "Hortifruti",
           "tipo": "balanca_setor",
           "numero": "16",
           "serie": "10740032",
           "patrimonio": "6883"
         }
       ],
-      "padaria": [
+      "Padaria": [
         {
           "id": 1745663730198,
-          "setor": "padaria",
+          "setor": "Padaria",
           "tipo": "balanca_setor",
           "numero": "34",
           "serie": "10744755",
@@ -98,7 +98,7 @@
         },
         {
           "id": 1745663744582,
-          "setor": "padaria",
+          "setor": "Padaria",
           "tipo": "balanca_setor",
           "numero": "45",
           "serie": "10653244",
@@ -106,17 +106,17 @@
         },
         {
           "id": 1745663765909,
-          "setor": "padaria",
+          "setor": "Padaria",
           "tipo": "balanca_setor",
           "numero": "22",
           "serie": "10653253",
           "patrimonio": "9279"
         }
       ],
-      "açougue": [
+      "Açougue": [
         {
           "id": 1745663857681,
-          "setor": "açougue",
+          "setor": "Açougue",
           "tipo": "balanca_setor",
           "numero": "64",
           "serie": "10653260",
@@ -124,7 +124,7 @@
         },
         {
           "id": 1745663868453,
-          "setor": "açougue",
+          "setor": "Açougue",
           "tipo": "balanca_setor",
           "numero": "52",
           "serie": "10653252",
@@ -132,7 +132,7 @@
         },
         {
           "id": 1745663880261,
-          "setor": "açougue",
+          "setor": "Açougue",
           "tipo": "balanca_setor",
           "numero": "42",
           "serie": "10653256",
@@ -140,7 +140,7 @@
         },
         {
           "id": 1745663898675,
-          "setor": "açougue",
+          "setor": "Açougue",
           "tipo": "balanca_setor",
           "numero": "44",
           "serie": "10653246",
@@ -148,7 +148,7 @@
         },
         {
           "id": 1745663910233,
-          "setor": "açougue",
+          "setor": "Açougue",
           "tipo": "balanca_setor",
           "numero": "21",
           "serie": "10653253",
@@ -157,7 +157,7 @@
       ]
     },
     "mogi_guacu": {
-      "padaria": []
+      "Padaria": []
     }
   }
 }

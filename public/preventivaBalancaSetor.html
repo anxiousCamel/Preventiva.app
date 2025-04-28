@@ -225,13 +225,13 @@
       // checklist options: idSuffix e labelText
       const CHECKLIST_OPTIONS = [
         { idSuffix: "limparCabecote", labelText: "Limpar cabeçote" },
-        { idSuffix: "testeImpressao", labelText: "Teste de impressão" },
-        { idSuffix: "pesoBalanca", labelText: "Peso da balança" },
+        { idSuffix: "testeDeImpressao", labelText: "Teste de impressão" },
+        { idSuffix: "peso", labelText: "Peso da balança" },
         { idSuffix: "teclado", labelText: "Teclado" },
         { idSuffix: "display", labelText: "Display" },
         { idSuffix: "nivelarBalanca", labelText: "Nivelar balança" },
         { idSuffix: "cabos", labelText: "Cabos" },
-        { idSuffix: "retirarAdesivo", labelText: "Retirar adesivo e outros" },
+        { idSuffix: "retirarAdesivos", labelText: "Retirar adesivo e outros" },
         { idSuffix: "tampas", labelText: "Tampas" },
         { idSuffix: "limpezaBalanca", labelText: "Limpeza da balança" },
       ];
@@ -681,7 +681,8 @@
           r.arrayBuffer()
         );
         const pdfDoc = await PDFDocument.load(templateBytes);
-        const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+        const helveticaFont     = await pdfDoc.embedFont(StandardFonts.Helvetica);
+        const helveticaBoldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
         const form = pdfDoc.getForm();
 
         const perPage = 2;
@@ -714,7 +715,7 @@
             x: x + slotIndex * deltaX,
             y: y + height - 12,
             size: 12,
-            font: helveticaFont,
+            font: helveticaBoldFont,
           });
         }
 
@@ -883,13 +884,13 @@
           // Checkboxes
           const checkboxes = [
             "limparCabecote",
-            "testeImpressao",
-            "pesoBalanca",
+            "testeDeImpressao",
+            "peso",
             "teclado",
             "display",
             "nivelarBalanca",
             "cabos",
-            "retirarAdesivo",
+            "retirarAdesivos",
             "tampas",
             "limpezaBalança",
           ];
