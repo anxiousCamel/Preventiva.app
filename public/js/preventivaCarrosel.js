@@ -155,7 +155,7 @@ if (equipamentosData) {
                 </select>
                 <p>Assinatura:</p>
                 <canvas id="signatureCanvasResponsavel_${sortedIdx}" width="300" height="150" style="border:1px solid #ccc;"></canvas><br>
-                <button type="button" onclick="clearSignature('Responsavel', ${sortedIdx})">Limpar</button>
+                <button type="button" onclick="clearSignature('Responsavel', ${sortedIdx})"> <i class="fa-solid fa-eraser"></i> Limpar</button>
                 <input type="hidden" id="assinaturaInputResponsavel_${sortedIdx}" name="assinaturaResponsavel"   value="">
               </fieldset>
     
@@ -165,7 +165,7 @@ if (equipamentosData) {
                 <input type="text" id="nomeTi_${sortedIdx}" name="nomeTi" placeholder="Nome do técnico">
                 <p>Assinatura:</p>
                 <canvas id="signatureCanvasTi_${sortedIdx}" width="300" height="150" style="border:1px solid #ccc;"></canvas><br>
-                <button type="button" onclick="clearSignature('Ti', ${sortedIdx})">Limpar</button>
+                <button type="button" onclick="clearSignature('Ti', ${sortedIdx})"><i class="fa-solid fa-eraser"></i> Limpar</button>
                 <input type="hidden" id="assinaturaInputTi_${sortedIdx}" name="assinaturaTi" value="">
               </fieldset>
             `;
@@ -272,7 +272,7 @@ if (equipamentosData) {
     // Adiciona botão para navegação ao próximo grupo
     const nextButton = document.createElement("button");
     nextButton.type = "button";
-    nextButton.textContent = "Próximo";
+    nextButton.innerHTML = 'Próximo <i class="fa-solid fa-forward"></i>';
     nextButton.onclick = () => {
       // Rolando a página para o topo
       window.scrollTo({ top: 0, behavior: "smooth" });
