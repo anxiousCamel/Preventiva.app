@@ -1,3 +1,4 @@
+// public/js/listarEquipamentos.js
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("form").addEventListener("submit", async (event) => {
     event.preventDefault();

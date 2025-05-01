@@ -1,4 +1,4 @@
-// public>js>cadastroEquipamento.js
+// public/js/cadastroEquipamento.js
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("form").addEventListener("submit", async (event) => {
     event.preventDefault();
