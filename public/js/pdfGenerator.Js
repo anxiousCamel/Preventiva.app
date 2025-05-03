@@ -225,7 +225,7 @@ async function generateFilledPDF() {
       "cabos",
       "retirarAdesivos",
       "tampas",
-      "limpezaBalança",
+      "limpezaBalanca",
     ];
     checkboxes.forEach((name) => {
       const checked = document.getElementById(
