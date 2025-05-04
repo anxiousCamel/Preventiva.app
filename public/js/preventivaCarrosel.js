@@ -79,6 +79,7 @@ if (equipamentosData) {
     const thisSector = (equipamento.setor || "").toLowerCase();
     const slide = document.createElement("div");
     slide.classList.add("slide");
+    slide.setAttribute("data-sector", thisSector);
 
     const form = document.createElement("form");
     form.id = `preventiveForm_${sortedIdx}`;
@@ -154,8 +155,8 @@ if (equipamentosData) {
                   <option>Supervisor</option>
                 </select>
                 <p>Assinatura:</p>
-                <canvas id="signatureCanvasResponsavel_${sortedIdx}" width="300" height="150" style="border:1px solid #ccc;"></canvas><br>
-                <button type="button" onclick="clearSignature('Responsavel', ${sortedIdx})"> <i class="fa-solid fa-eraser"></i> Limpar</button>
+                <canvas id="signatureCanvasResponsavel_${sortedIdx}" class="signature-canvas" "></canvas><br>
+                <button type="button" class="btn-clear-signature" onclick="clearSignature('Responsavel', ${sortedIdx})"> <i class="fa-solid fa-eraser"></i> Limpar</button>
                 <input type="hidden" id="assinaturaInputResponsavel_${sortedIdx}" name="assinaturaResponsavel"   value="">
               </fieldset>
     
@@ -164,9 +165,9 @@ if (equipamentosData) {
                 <label for="nomeTi_${sortedIdx}">Nome:</label>
                 <input type="text" id="nomeTi_${sortedIdx}" name="nomeTi" placeholder="Nome do técnico">
                 <p>Assinatura:</p>
-                <canvas id="signatureCanvasTi_${sortedIdx}" width="300" height="150" style="border:1px solid #ccc;"></canvas><br>
-                <button type="button" onclick="clearSignature('Ti', ${sortedIdx})"><i class="fa-solid fa-eraser"></i> Limpar</button>
-                <input type="hidden" id="assinaturaInputTi_${sortedIdx}" name="assinaturaTi" value="">
+                <canvas id="signatureCanvasTi_${sortedIdx}" class="signature-canvas" "></canvas><br>
+                <button type="button" class="btn-clear-signature" onclick="clearSignature('Ti', ${sortedIdx})"><i class="fa-solid fa-eraser"></i> Limpar</button>
+                <input type="hidden" id="assinaturaInputTi_${sortedIdx}"  name="assinaturaTi" value="">
               </fieldset>
             `;
     }
@@ -273,6 +274,8 @@ if (equipamentosData) {
     const nextButton = document.createElement("button");
     nextButton.type = "button";
     nextButton.innerHTML = 'Próximo <i class="fa-solid fa-forward"></i>';
+    nextButton.style.marginLeft = "auto";
+    nextButton.style.display = "block";
     nextButton.onclick = () => {
       // Rolando a página para o topo
       window.scrollTo({ top: 0, behavior: "smooth" });

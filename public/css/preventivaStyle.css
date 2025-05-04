@@ -1,4 +1,5 @@
-/* Estilos para o container do carrossel */
+
+  /* Estilos para o container do carrossel */
 #carouselContainer {
   display: flex;
   overflow-x: scroll;
@@ -16,11 +17,30 @@
   padding: 15px;
   box-sizing: border-box;
   background-color: #f9f9f9;
+  max-width: 600px;
 }
 
 fieldset {
   margin-bottom: 15px;
   padding: 10px;
+  max-width: 600px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  background-color: #f9f9f9;
+}
+
+legend {
+  font-weight: bold;
+  font-size: 1rem;
+  padding: 0 0.5rem;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 label {
@@ -29,25 +49,112 @@ label {
 }
 
 input[type="text"],
-input[type="file"] {
+input[type="file"],
+select,
+textarea {
   width: 100%;
-  padding: 8px;
-  margin-bottom: 10px;
+  padding: 0.5rem;
+  font-size: 1rem;
   box-sizing: border-box;
+  border-radius: 5px;
+  border: 1px solid #ccc;
 }
 
-button {
-  padding: 10px 15px;
+button,
+.btn-clear-signature {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border-radius: 6px;
   background-color: #007bff;
+  color: white;
   border: none;
-  color: #fff;
-  border-radius: 3px;
   cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+img[alt="Prévia"] {
+  width: 100%;
+  height: auto;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-top: 0.5rem;
+}
+
+
+/*Assinatura style*/
+
+/* Canvas com fundo branco e tamanho responsivo */
+.signature-canvas {
+  display: block;               /* remove espaços em linha */
+  width: 100%;                  /* ocupa toda largura do container */
+  max-width: 600px;
+  height: auto;                 /* mantém proporção definida por width/height attributes */
+  background-color: #fff;       /* fundo branco */
+  border: 1px solid #ccc;
+  box-sizing: border-box;       /* inclui borda no cálculo de largura */
+}
+
+/* Botão que ocupa toda largura do canvas */
+.btn-clear-signature {
+  display: block;
+  width: 100%;
+  max-width: 600px;
+  cursor: pointer;
+  background-color: #e85212;
+}
+
+.button-wrapper {
+  display: flex;
+  justify-content: center;
+  padding-right: 20px;
+}
+
+.full-width-button {
+  width: 100%;
 }
 
 /* -------------------------------------
 Gooey Checkbox Styles (de avstorm)
 ------------------------------------- */
+
+/* Remove qualquer transition do próprio input */
+.cbx input {
+  /* Desativa todas as transições */
+  transition: none !important; /* boa prática para garantir a sobrescrita */
+}
+
+/* Remove hover state animado (mesmo que seja só mudança de border) */
+.cbx input:hover {
+  border-color: #bfbfc0; /* volta à cor original */
+}
+
+/* Remove qualquer transição do ícone SVG */
+.cbx svg path {
+  transition: none !important;
+  /* Garante que ele já esteja desenhado */
+  stroke-dashoffset: 0 !important;
+}
+
+/* Desativa a animação de splash no label quando marcado */
+input[type="checkbox"]:checked + label {
+  animation: none !important;
+  background: #12408f; /* mantém o estado marcado se quiser */
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+}
+/* Opcional: você pode remover completamente a keyframe, 
+   mas não é estritamente necessário se 'animation: none' estiver definido. */
+/* @keyframes splash { } */
 
 /* reset básico para checkbox customizado */
 input[type="checkbox"] {
@@ -138,9 +245,7 @@ input[type="checkbox"]:checked + label + svg path {
   40% {
     transform: scale(1);
     background: #12408f;
-    box-shadow: 0 -18px 0 -8px #12408f, 16px -8px 0 -8px #12408f,
-      16px 8px 0 -8px #12408f, 0 18px 0 -8px #12408f,
-      -16px 8px 0 -8px #12408f, -16px -8px 0 -8px #12408f;
+   
   }
 
   100% {
@@ -149,5 +254,27 @@ input[type="checkbox"]:checked + label + svg path {
       28px -16px 0 -10px transparent, 28px 16px 0 -10px transparent,
       0 32px 0 -10px transparent, -28px 16px 0 -10px transparent,
       -28px -16px 0 -10px transparent;
+  }
+}
+
+
+@media (max-width: 768px) {
+  .slide {
+    padding: 1rem;
+  }
+
+  .signature-canvas {
+    width: 100%;
+    height: 150px;
+  }
+
+  .btn-clear-signature {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+
+  .checklist-item {
+    flex-wrap: wrap;
+    gap: 0.25rem;
   }
 }
