@@ -128,7 +128,16 @@ if (equipamentosData) {
               ).join("")}
             </fieldset>
 
-    
+             <!-- Bom uso de comentário: explicita a finalidade do campo -->
+              <fieldset>
+                <label for="current_${sortedIdx}">Corrente Elétrica:</label>
+                <select id="current_${sortedIdx}" name="current" required>
+                  <option value="" disabled>Selecione a tensão</option>
+                  <option value="110">110 V</option>
+                  <option value="220" selected>220 V</option>
+                </select>
+              </fieldset>
+
             <fieldset>
               <legend>Fotos Depois</legend>
               <input type="file" id="fotoDepois_${sortedIdx}" name="fotoDepois" accept="image/*" capture="environment">
