@@ -1,4 +1,5 @@
 // public/js/preventivaCarrosel.js
+import { setItem } from "./storage.js";
 // Recupera os dados dos equipamentos armazenados no sessionStorage
 const equipamentosData = localStorage.getItem("equipamentosData");
 const carouselContainer = document.getElementById("carouselContainer");
@@ -17,6 +18,21 @@ function debounce(fn, wait) {
     timeoutId = setTimeout(() => fn.apply(this, args), wait);
   };
 }
+
+/**
+ * Converte um File em DataURL (base64).
+ * @param {File} file
+ * @returns {Promise<string>} – DataURL
+ */
+function fileToDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);  // lê como base64 data URL :contentReference[oaicite:0]{index=0}
+  });
+}
+
 
 /**
  * Mostra a pré-visualização da imagem.
@@ -193,56 +209,43 @@ if (equipamentosData) {
     }
     lastSector = thisSector;
 
+
     /**
-     * Salva o estado do slide `idx` no localStorage
+     * Salva todo o estado do slide no IndexedDB.
+     * @param {number} idx
      */
-    function saveSlideState(idx) {
+    async function saveSlideState(idx) {
       const form = document.getElementById(`preventiveForm_${idx}`);
       if (!form) return;
-
-      // Objeto que vai conter todos os valores
+    
       const state = {
         text: {},
+        textarea: {},
         check: {},
         images: {},
-        textarea: {},
-        signatures: {},
+        signatures: {}
       };
-
-      // Campos de texto e select
-      form.querySelectorAll('input[type="text"], select').forEach((el) => {
+    
+      // Coleta valores…
+      form.querySelectorAll('input[type="text"], select').forEach(el => {
         state.text[el.id] = el.value;
       });
-
-      // Textareas
-      form.querySelectorAll("textarea").forEach((el) => {
+      form.querySelectorAll('textarea').forEach(el => {
         state.textarea[el.id] = el.value;
       });
-
-      // Checkboxes
-      form.querySelectorAll('input[type="checkbox"]').forEach((el) => {
+      form.querySelectorAll('input[type="checkbox"]').forEach(el => {
         state.check[el.id] = el.checked;
       });
-
-      // Imagens (usar prévia já carregada)
-      ["Antes", "Depois"].forEach((type) => {
-        const preview = document.getElementById(`previewFoto${type}_${idx}`);
-        if (preview && preview.src) {
-          state.images[`foto${type}_${idx}`] = preview.src;
-        }
+      ["Antes","Depois"].forEach(type => {
+        const img = document.getElementById(`previewFoto${type}_${idx}`);
+        if (img && img.src) state.images[`foto${type}_${idx}`] = img.src;
       });
-
-      // Assinaturas (canvas -> DataURL)
-      ["Responsavel", "Ti"].forEach((role) => {
-        const canvas = document.getElementById(`signatureCanvas${role}_${idx}`);
-        if (canvas) {
-          state.signatures[canvas.id] = canvas.toDataURL();
-        }
-      });
-
-      // Grava no localStorage
-      localStorage.setItem(`preventiva_state_${idx}`, JSON.stringify(state));
+      state.signatures = captureSignatures(idx, ['Responsavel','Ti']);
+    
+      // Grava no IndexedDB
+      await setItem(`preventiva_state_${idx}`, state);
     }
+    
 
     form.innerHTML = html;
 
@@ -280,19 +283,29 @@ if (equipamentosData) {
     form.querySelectorAll('input[type="checkbox"]')
       .forEach(el => el.addEventListener('change', () => debouncedSave(sortedIdx)));
 
-    // Eventos de arquivo (após converter p/ DataURL)
-    form.querySelectorAll('input[type="file"]')
-      .forEach(el => el.addEventListener('change', async () => {
-        // ... lógica de fileToBase64()
-        debouncedSave(sortedIdx);
-      }));
+    /// Para inputs de arquivo
+    form.querySelectorAll('input[type="file"]').forEach(input =>
+      input.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const dataUrl = await fileToDataURL(file);      // converte o arquivo
+        const type = input.name === 'fotoAntes' ? 'Antes' : 'Depois';
+        const preview = document.getElementById(`previewFoto${type}_${idx}`);
+        preview.src = dataUrl;
+        preview.style.display = 'block';
+        await saveSlideState(idx);                      // salva logo após
+      })
+    );
 
-    // Eventos de assinatura (canvas)
-    ['mouseup', 'touchend'].forEach(evt => {
-      const canvas = document.getElementById(`signatureCanvasResponsavel_${sortedIdx}`);
-      if (canvas) canvas.addEventListener(evt, () => debouncedSave(sortedIdx));
-      const canvasTi = document.getElementById(`signatureCanvasTi_${sortedIdx}`);
-      if (canvasTi) canvasTi.addEventListener(evt, () => debouncedSave(sortedIdx));
+    // Para canvas de assinatura (após evento mouseup/touchend)
+    ['Responsavel', 'Ti'].forEach(role => {
+      const canvas = document.getElementById(`signatureCanvas${role}_${idx}`);
+      if (!canvas) return;
+      ['mouseup', 'touchend'].forEach(evt => {
+        canvas.addEventListener(evt, async () => {
+          await saveSlideState(idx);
+        });
+      });
     });
 
     // configura previews
@@ -304,6 +317,7 @@ if (equipamentosData) {
           form.querySelector(`#previewFotoAntes_${sortedIdx}`)
         )
       );
+
     form
       .querySelector(`#fotoDepois_${sortedIdx}`)
       .addEventListener("change", (e) =>
@@ -350,3 +364,25 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 });
+
+
+
+/**
+ * Captura as assinaturas do canvas e retorna um objeto role → dataURL.
+ * @param {number} idx – índice do slide
+ * @param {string[]} roles – ex.: ['Responsavel','Ti']
+ * @returns {{[canvasId:string]:string}}
+ */
+function captureSignatures(idx, roles) {
+  const sigs = {};
+  roles.forEach((role) => {
+    const canvasId = `signatureCanvas${role}_${idx}`;
+    const canvas = document.getElementById(canvasId);
+    if (canvas) {
+      // Primeiro garante que todo desenho foi finalizado
+      // (pode adicionar debounce se quiser)
+      sigs[canvasId] = canvas.toDataURL();
+    }
+  });
+  return sigs;
+}
