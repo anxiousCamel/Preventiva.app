@@ -4,6 +4,21 @@ const equipamentosData = sessionStorage.getItem("equipamentosData");
 const carouselContainer = document.getElementById("carouselContainer");
 
 /**
+ * Cria uma função debounced que aguarda 'wait' ms antes de chamar 'fn'.
+ * Se chamada novamente antes do tempo, reinicia o timer.
+ * @param {Function} fn – função a ser executada (e.g. saveSlideState)
+ * @param {number} wait – atraso em milissegundos
+ * @returns {Function}
+ */
+function debounce(fn, wait) {
+  let timeoutId;
+  return function (...args) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => fn.apply(this, args), wait);
+  };
+}
+
+/**
  * Mostra a pré-visualização da imagem.
  * @param {HTMLInputElement} fileInput - O input de arquivo
  * @param {HTMLImageElement} previewImg - Elemento <img> para exibir a prévia
@@ -92,21 +107,17 @@ if (equipamentosData) {
             <fieldset>
               <legend>Dados da Balança ${sortedIdx + 1}</legend>
               <div><label for="numero_${sortedIdx}">Número:</label>
-                   <input type="text" id="numero_${sortedIdx}" name="numero" readonly value="${
-      equipamento.numero || ""
-    }"></div>
+                   <input type="text" id="numero_${sortedIdx}" name="numero" readonly value="${equipamento.numero || ""
+      }"></div>
               <div><label for="setor_${sortedIdx}">Setor:</label>
-                   <input type="text" id="setor_${sortedIdx}" name="setor" readonly value="${
-      equipamento.setor || ""
-    }"></div>
+                   <input type="text" id="setor_${sortedIdx}" name="setor" readonly value="${equipamento.setor || ""
+      }"></div>
               <div><label for="serie_${sortedIdx}">Série:</label>
-                   <input type="text" id="serie_${sortedIdx}" name="serie" readonly value="${
-      equipamento.serie || ""
-    }"></div>
+                   <input type="text" id="serie_${sortedIdx}" name="serie" readonly value="${equipamento.serie || ""
+      }"></div>
               <div><label for="patrimonio_${sortedIdx}">Patrimônio:</label>
-                   <input type="text" id="patrimonio_${sortedIdx}" name="patrimonio" readonly value="${
-      equipamento.patrimonio || ""
-    }"></div>
+                   <input type="text" id="patrimonio_${sortedIdx}" name="patrimonio" readonly value="${equipamento.patrimonio || ""
+      }"></div>
             </fieldset>
     
             <fieldset>
@@ -124,8 +135,8 @@ if (equipamentosData) {
                 </label>
               </div>
               ${CHECKLIST_OPTIONS.map((opt) =>
-                createChecklistItem(sortedIdx, opt.idSuffix, opt.labelText)
-              ).join("")}
+        createChecklistItem(sortedIdx, opt.idSuffix, opt.labelText)
+      ).join("")}
             </fieldset>
 
              <!-- Bom uso de comentário: explicita a finalidade do campo -->
@@ -233,50 +244,8 @@ if (equipamentosData) {
       localStorage.setItem(`preventiva_state_${idx}`, JSON.stringify(state));
     }
 
-    // Associa listeners
-    document.querySelectorAll("form[id^='preventiveForm_']").forEach((form) => {
-      const idx = form.id.split("_")[1];
-
-      // Textos e selects
-      form
-        .querySelectorAll('input[type="text"], select, textarea')
-        .forEach((el) =>
-          el.addEventListener("input", () => saveSlideState(idx))
-        );
-
-      // Checkboxes
-      form
-        .querySelectorAll('input[type="checkbox"]')
-        .forEach((el) =>
-          el.addEventListener("change", () => saveSlideState(idx))
-        );
-
-      // Arquivos (imagens)
-      form.querySelectorAll('input[type="file"]').forEach((el) => {
-        el.addEventListener("change", async () => {
-          const file = el.files[0];
-          if (!file) return;
-          const dataUrl = await fileToBase64(file);
-          // Ajusta preview imediatamente
-          const preview = document.getElementById(
-            `preview${el.id.replace("foto", "previewFoto")}`
-          );
-          if (preview) preview.src = dataUrl;
-          saveSlideState(idx);
-        });
-      });
-
-      // Canvas de assinatura: após desenho
-      ["Responsavel", "Ti"].forEach((role) => {
-        const canvas = document.getElementById(`signatureCanvas${role}_${idx}`);
-        if (canvas) {
-          canvas.addEventListener("mouseup", () => saveSlideState(idx));
-          canvas.addEventListener("touchend", () => saveSlideState(idx));
-        }
-      });
-    });
-
     form.innerHTML = html;
+
     slide.appendChild(form);
 
     // Adiciona botão para navegação ao próximo grupo
@@ -298,6 +267,33 @@ if (equipamentosData) {
     form.appendChild(nextButton);
 
     carouselContainer.appendChild(slide);
+
+    // Associa listeners
+    const idx = form.id.split("_")[1];
+    const debouncedSave = debounce((idx) => saveSlideState(idx), 1000);
+
+    // Eventos de texto/select/textarea
+    form.querySelectorAll('input[type="text"], select, textarea')
+      .forEach(el => el.addEventListener('input', () => debouncedSave(sortedIdx)));
+
+    // Eventos de checkbox
+    form.querySelectorAll('input[type="checkbox"]')
+      .forEach(el => el.addEventListener('change', () => debouncedSave(sortedIdx)));
+
+    // Eventos de arquivo (após converter p/ DataURL)
+    form.querySelectorAll('input[type="file"]')
+      .forEach(el => el.addEventListener('change', async () => {
+        // ... lógica de fileToBase64()
+        debouncedSave(sortedIdx);
+      }));
+
+    // Eventos de assinatura (canvas)
+    ['mouseup', 'touchend'].forEach(evt => {
+      const canvas = document.getElementById(`signatureCanvasResponsavel_${sortedIdx}`);
+      if (canvas) canvas.addEventListener(evt, () => debouncedSave(sortedIdx));
+      const canvasTi = document.getElementById(`signatureCanvasTi_${sortedIdx}`);
+      if (canvasTi) canvasTi.addEventListener(evt, () => debouncedSave(sortedIdx));
+    });
 
     // configura previews
     form
