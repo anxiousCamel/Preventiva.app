@@ -174,6 +174,7 @@ async function generateFilledPDF() {
     // Valores textuais
     const numberValue = document.getElementById(`numero_${idx}`)?.value || "";
     const serialValue = document.getElementById(`serie_${idx}`)?.value || "";
+    const currentVoltage = document.getElementById(`current_${idx}`)?.value || "";
     const patrimonyValue =
       document.getElementById(`patrimonio_${idx}`)?.value || "";
     const obsValue = document.getElementById(`observacoes_${idx}`)?.value || "";
@@ -187,6 +188,7 @@ async function generateFilledPDF() {
     drawTextFieldDirect(page, "equipment_number", numberValue, slotIndex);
     drawTextFieldDirect(page, "equipment_sector", sectorValue, slotIndex);
     drawTextFieldDirect(page, "equipment_serial", serialValue, slotIndex);
+    drawTextFieldDirect(page, "equipment_electricCurrent", currentVoltage, slotIndex);
     drawTextFieldDirect(
       page,
       "equipment_patrimonio",
