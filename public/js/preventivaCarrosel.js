@@ -1,6 +1,6 @@
 // public/js/preventivaCarrosel.js
 // Recupera os dados dos equipamentos armazenados no sessionStorage
-const equipamentosData = sessionStorage.getItem("equipamentosData");
+const equipamentosData = localStorage.getItem("equipamentosData");
 const carouselContainer = document.getElementById("carouselContainer");
 
 /**

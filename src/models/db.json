@@ -153,6 +153,15 @@
           "numero": "21",
           "serie": "10653253",
           "patrimonio": "----"
+        },
+        {
+          "id": 1746707320984,
+          "setor": "Frios",
+          "tipo": "balanca_setor",
+          "numero": "63",
+          "serie": "10744750",
+          "patrimonio": "---",
+          "loja": "maria_antonia"
         }
       ],
       "Peixaria": []

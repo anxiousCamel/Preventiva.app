@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       
       // Armazena os dados dos equipamentos no sessionStorage para passar para a nova página
-      sessionStorage.setItem("equipamentosData", JSON.stringify(equipamentos));
+      localStorage.setItem("equipamentosData", JSON.stringify(equipamentos));
 
       // Mapeamento do tipo de equipamento para a página de preventiva correspondente
       const pageMapping = {
