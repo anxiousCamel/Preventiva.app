@@ -73,12 +73,12 @@
       <label for="sectorSelect">Setor:</label>
       <select id="sectorSelect">
         <option value="">Todos os setores</option>
-        <option value="açougue">Açougue</option>
-        <option value="padaria">Padaria</option>
-        <option value="frios">Frios e Laticínios</option>
-        <option value="hortifruti">Hortifruti</option>
-        <option value="rotisseria">Rotisseria</option>
-        <option value="peixaria">Peixaria</option>
+        <option value="Açougue">Açougue</option>
+        <option value="Padaria">Padaria</option>
+        <option value="Frios">Frios e Laticínios</option>
+        <option value="Hortifruti">Hortifruti</option>
+        <option value="Rotisseria">Rotisseria</option>
+        <option value="Peixaria">Peixaria</option>
         <!-- … demais opções … -->
       </select>
     </div>
@@ -160,6 +160,7 @@
       if (sectorSelect.value) params.append('setor', sectorSelect.value);
 
       const res = await fetch(`/equipamentos?${params.toString()}`);
+
       if (!res.ok) {
         console.error('Erro ao buscar equipamentos', await res.text());
         return [];
