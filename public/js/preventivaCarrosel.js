@@ -1,57 +1,11 @@
 // public/js/preventivaCarrosel.js
+import {debounce,fileToDataURL,previewImage,captureSignatures,toggleAllCheckboxes} from "./utils.js";
+import { generateEquipmentFieldset } from "./equipmentFieldsetGenerator.js";
+import { generateChecklistHTML } from "./checklistGenerator.js";
 import { setItem } from "./storage.js";
 // Recupera os dados dos equipamentos armazenados no sessionStorage
 const equipamentosData = localStorage.getItem("equipamentosData");
 const carouselContainer = document.getElementById("carouselContainer");
-
-/**
- * Cria uma função debounced que aguarda 'wait' ms antes de chamar 'fn'.
- * Se chamada novamente antes do tempo, reinicia o timer.
- * @param {Function} fn – função a ser executada (e.g. saveSlideState)
- * @param {number} wait – atraso em milissegundos
- * @returns {Function}
- */
-function debounce(fn, wait) {
-  let timeoutId;
-  return function (...args) {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => fn.apply(this, args), wait);
-  };
-}
-
-/**
- * Converte um File em DataURL (base64).
- * @param {File} file
- * @returns {Promise<string>} – DataURL
- */
-function fileToDataURL(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);  // lê como base64 data URL :contentReference[oaicite:0]{index=0}
-  });
-}
-
-
-/**
- * Mostra a pré-visualização da imagem.
- * @param {HTMLInputElement} fileInput - O input de arquivo
- * @param {HTMLImageElement} previewImg - Elemento <img> para exibir a prévia
- */
-function previewImage(fileInput, previewImg) {
-  const file = fileInput.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      previewImg.src = e.target.result;
-      previewImg.style.display = "block";
-    };
-    reader.readAsDataURL(file);
-  } else {
-    previewImg.style.display = "none";
-  }
-}
 
 // checklist options: idSuffix e labelText
 const CHECKLIST_OPTIONS = [
@@ -66,31 +20,6 @@ const CHECKLIST_OPTIONS = [
   { idSuffix: "tampas", labelText: "Tampas" },
   { idSuffix: "limpezaBalanca", labelText: "Limpeza da balança" },
 ];
-
-/**
- * Gera o HTML de um item do checklist com Gooey Checkbox.
- * @param {number} slideIndex – índice do slide para ID único
- * @param {string} idSuffix – sufixo único para o ID
- * @param {string} labelText – texto exibido
- * @returns {string} bloco de HTML
- */
-function createChecklistItem(slideIndex, idSuffix, labelText) {
-  const fieldId = `${idSuffix}_${slideIndex}`;
-  return `
-          <div class="checklist-item" style="display:flex; align-items:center; margin-bottom:8px;">
-            <div class="cbx">
-              <input type="checkbox" id="${fieldId}" name="checklist" value="${idSuffix}">
-              <label for="${fieldId}"></label>
-              <svg width="15" height="14" viewBox="0 0 15 14" fill="none">
-                <path d="M2 8.36364L6.23077 12L13 2" />
-              </svg>
-            </div>
-            <label for="${fieldId}" style="user-select:none; cursor:pointer;">
-              ${labelText}
-            </label>
-          </div>
-        `;
-}
 
 if (equipamentosData) {
   const equipamentos = JSON.parse(equipamentosData);
@@ -120,21 +49,7 @@ if (equipamentosData) {
 
     // HTML base
     let html = `
-            <fieldset>
-              <legend>Dados da Balança ${sortedIdx + 1}</legend>
-              <div><label for="numero_${sortedIdx}">Número:</label>
-                   <input type="text" id="numero_${sortedIdx}" name="numero" readonly value="${equipamento.numero || ""
-      }"></div>
-              <div><label for="setor_${sortedIdx}">Setor:</label>
-                   <input type="text" id="setor_${sortedIdx}" name="setor" readonly value="${equipamento.setor || ""
-      }"></div>
-              <div><label for="serie_${sortedIdx}">Série:</label>
-                   <input type="text" id="serie_${sortedIdx}" name="serie" readonly value="${equipamento.serie || ""
-      }"></div>
-              <div><label for="patrimonio_${sortedIdx}">Patrimônio:</label>
-                   <input type="text" id="patrimonio_${sortedIdx}" name="patrimonio" readonly value="${equipamento.patrimonio || ""
-      }"></div>
-            </fieldset>
+            ${generateEquipmentFieldset(equipamento, sortedIdx)}
     
             <fieldset>
               <legend>Fotos Antes</legend>
@@ -150,20 +65,17 @@ if (equipamentosData) {
                   Marcar todos
                 </label>
               </div>
-              ${CHECKLIST_OPTIONS.map((opt) =>
-        createChecklistItem(sortedIdx, opt.idSuffix, opt.labelText)
-      ).join("")}
+              ${generateChecklistHTML(CHECKLIST_OPTIONS, sortedIdx)}
             </fieldset>
-
-             <!-- Bom uso de comentário: explicita a finalidade do campo -->
-              <fieldset>
+            
+            <fieldset>
                 <label for="current_${sortedIdx}">Corrente Elétrica:</label>
                 <select id="current_${sortedIdx}" name="current" required>
                   <option value="" disabled>Selecione a tensão</option>
                   <option value="110">110 V</option>
                   <option value="220" selected>220 V</option>
                 </select>
-              </fieldset>
+            </fieldset>
 
             <fieldset>
               <legend>Fotos Depois</legend>
@@ -209,7 +121,6 @@ if (equipamentosData) {
     }
     lastSector = thisSector;
 
-
     /**
      * Salva todo o estado do slide no IndexedDB.
      * @param {number} idx
@@ -217,35 +128,34 @@ if (equipamentosData) {
     async function saveSlideState(idx) {
       const form = document.getElementById(`preventiveForm_${idx}`);
       if (!form) return;
-    
+
       const state = {
         text: {},
         textarea: {},
         check: {},
         images: {},
-        signatures: {}
+        signatures: {},
       };
-    
+
       // Coleta valores…
-      form.querySelectorAll('input[type="text"], select').forEach(el => {
+      form.querySelectorAll('input[type="text"], select').forEach((el) => {
         state.text[el.id] = el.value;
       });
-      form.querySelectorAll('textarea').forEach(el => {
+      form.querySelectorAll("textarea").forEach((el) => {
         state.textarea[el.id] = el.value;
       });
-      form.querySelectorAll('input[type="checkbox"]').forEach(el => {
+      form.querySelectorAll('input[type="checkbox"]').forEach((el) => {
         state.check[el.id] = el.checked;
       });
-      ["Antes","Depois"].forEach(type => {
+      ["Antes", "Depois"].forEach((type) => {
         const img = document.getElementById(`previewFoto${type}_${idx}`);
         if (img && img.src) state.images[`foto${type}_${idx}`] = img.src;
       });
-      state.signatures = captureSignatures(idx, ['Responsavel','Ti']);
-    
+      state.signatures = captureSignatures(idx, ["Responsavel", "Ti"]);
+
       // Grava no IndexedDB
       await setItem(`preventiva_state_${idx}`, state);
     }
-    
 
     form.innerHTML = html;
 
@@ -276,32 +186,38 @@ if (equipamentosData) {
     const debouncedSave = debounce((idx) => saveSlideState(idx), 1000);
 
     // Eventos de texto/select/textarea
-    form.querySelectorAll('input[type="text"], select, textarea')
-      .forEach(el => el.addEventListener('input', () => debouncedSave(sortedIdx)));
+    form
+      .querySelectorAll('input[type="text"], select, textarea')
+      .forEach((el) =>
+        el.addEventListener("input", () => debouncedSave(sortedIdx))
+      );
 
     // Eventos de checkbox
-    form.querySelectorAll('input[type="checkbox"]')
-      .forEach(el => el.addEventListener('change', () => debouncedSave(sortedIdx)));
+    form
+      .querySelectorAll('input[type="checkbox"]')
+      .forEach((el) =>
+        el.addEventListener("change", () => debouncedSave(sortedIdx))
+      );
 
     /// Para inputs de arquivo
-    form.querySelectorAll('input[type="file"]').forEach(input =>
-      input.addEventListener('change', async (e) => {
+    form.querySelectorAll('input[type="file"]').forEach((input) =>
+      input.addEventListener("change", async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        const dataUrl = await fileToDataURL(file);      // converte o arquivo
-        const type = input.name === 'fotoAntes' ? 'Antes' : 'Depois';
+        const dataUrl = await fileToDataURL(file); // converte o arquivo
+        const type = input.name === "fotoAntes" ? "Antes" : "Depois";
         const preview = document.getElementById(`previewFoto${type}_${idx}`);
         preview.src = dataUrl;
-        preview.style.display = 'block';
-        await saveSlideState(idx);                      // salva logo após
+        preview.style.display = "block";
+        await saveSlideState(idx); // salva logo após
       })
     );
 
     // Para canvas de assinatura (após evento mouseup/touchend)
-    ['Responsavel', 'Ti'].forEach(role => {
+    ["Responsavel", "Ti"].forEach((role) => {
       const canvas = document.getElementById(`signatureCanvas${role}_${idx}`);
       if (!canvas) return;
-      ['mouseup', 'touchend'].forEach(evt => {
+      ["mouseup", "touchend"].forEach((evt) => {
         canvas.addEventListener(evt, async () => {
           await saveSlideState(idx);
         });
@@ -331,27 +247,6 @@ if (equipamentosData) {
   alert("Dados do equipamento não encontrados. Inicie a preventiva novamente.");
 }
 
-// Função para marcar/desmarcar todos os checkboxes
-function toggleAllCheckboxes(slideIndex) {
-  const checkboxes = document.querySelectorAll(
-    `#preventiveForm_${slideIndex} input[type="checkbox"]:not(#checkAll_${slideIndex})`
-  );
-  const checkAllCheckbox = document.getElementById(`checkAll_${slideIndex}`);
-
-  // Verifica se todos os checkboxes estão marcados
-  const allChecked = Array.from(checkboxes).every(
-    (checkbox) => checkbox.checked
-  );
-
-  // Marca/desmarca todos os checkboxes
-  checkboxes.forEach((checkbox) => {
-    checkbox.checked = !allChecked;
-  });
-
-  // Atualiza o estado do "Marcar todos"
-  checkAllCheckbox.checked = !allChecked;
-}
-
 // Adiciona o evento ao "Marcar todos"
 document.addEventListener("DOMContentLoaded", () => {
   const checkAllCheckboxes = document.querySelectorAll(
@@ -364,25 +259,3 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 });
-
-
-
-/**
- * Captura as assinaturas do canvas e retorna um objeto role → dataURL.
- * @param {number} idx – índice do slide
- * @param {string[]} roles – ex.: ['Responsavel','Ti']
- * @returns {{[canvasId:string]:string}}
- */
-function captureSignatures(idx, roles) {
-  const sigs = {};
-  roles.forEach((role) => {
-    const canvasId = `signatureCanvas${role}_${idx}`;
-    const canvas = document.getElementById(canvasId);
-    if (canvas) {
-      // Primeiro garante que todo desenho foi finalizado
-      // (pode adicionar debounce se quiser)
-      sigs[canvasId] = canvas.toDataURL();
-    }
-  });
-  return sigs;
-}
