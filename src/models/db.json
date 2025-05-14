@@ -51,6 +51,15 @@
           "numero": "23",
           "serie": "10653250",
           "patrimonio": "5052"
+        },
+        {
+          "id": 1746707320984,
+          "setor": "Frios",
+          "tipo": "balanca_setor",
+          "numero": "63",
+          "serie": "10744750",
+          "patrimonio": "------",
+          "loja": "maria_antonia"
         }
       ],
       "Hortifruti": [
@@ -152,15 +161,7 @@
           "tipo": "balanca_setor",
           "numero": "21",
           "serie": "10653253",
-          "patrimonio": "----"
-        },
-        {
-          "id": 1746707320984,
-          "setor": "Açougue",
-          "tipo": "balanca_setor",
-          "numero": "63",
-          "serie": "10744750",
-          "patrimonio": "------",
+          "patrimonio": "----",
           "loja": "maria_antonia"
         }
       ],
