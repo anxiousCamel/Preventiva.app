@@ -112,34 +112,45 @@
       <h3>Editar Equipamento</h3>
       <input type="hidden" id="editId" />
       
-      <label for="editLoja">Loja:
-        <input type="text" id="editLoja" required />
+      
+    <!-- Dropdown de Loja -->
+    <label for="loja">Loja:</label>
+    <select id="loja" required>
+    </select>
+     
+    <!-- Dropdown de Setor -->
+    <label for="setor">Setor:</label>
+    <select id="setor" required>
+    </select>
+      
+       <!-- Dropdown de Tipo -->
+    <label for="tipo">Tipo de Equipamento:</label>
+    <select id="tipo" required>
+    </select>
+      
+      <label for="numero">Número:
+        <input type="text" id="numero" required />
       </label>
       
-      <label for="editSetor">Setor:
-        <input type="text" id="editSetor" required />
+      <label for="serie">Série:
+        <input type="text" id="serie" required />
       </label>
       
-      <label for="editTipo">Tipo:
-        <input type="text" id="editTipo" required />
-      </label>
-      
-      <label for="editNumero">Número:
-        <input type="text" id="editNumero" required />
-      </label>
-      
-      <label for="editSerie">Série:
-        <input type="text" id="editSerie" required />
-      </label>
-      
-      <label for="editPatrimonio">Patrimônio:
-        <input type="text" id="editPatrimonio" required />
+      <label for="patrimonio">Patrimônio:
+        <input type="text" id="patrimonio" required />
       </label>
       
       <button type="submit">Salvar</button>
       <button type="button" id="cancelEdit">Cancelar</button>
     </form>
   </div>
+
+   <!--
+    1) config.js: contém as arrays de configuração (lojas, setores, tipos)
+    2) populate.js: função que lê config.js e injeta <option> nos <select> com base nos IDs
+  -->
+  <script type="module" src="js/config.js"></script>
+  <script type="module" src="js/populate.js"></script>
 
   <script>
     // **Em inglês**: nomes de variáveis e funções
@@ -225,12 +236,12 @@
 
       // Preenche campos do modal
       document.getElementById('editId').value         = id;
-      document.getElementById('editLoja').value       = tr.children[1].textContent;
-      document.getElementById('editSetor').value      = tr.children[2].textContent;
-      document.getElementById('editTipo').value       = tr.children[3].textContent;
-      document.getElementById('editNumero').value     = tr.children[4].textContent;
-      document.getElementById('editSerie').value      = tr.children[5].textContent;
-      document.getElementById('editPatrimonio').value = tr.children[6].textContent;
+      document.getElementById('loja').value       = tr.children[1].textContent;
+      document.getElementById('setor').value      = tr.children[2].textContent;
+      document.getElementById('tipo').value       = tr.children[3].textContent;
+      document.getElementById('numero').value     = tr.children[4].textContent;
+      document.getElementById('serie').value      = tr.children[5].textContent;
+      document.getElementById('patrimonio').value = tr.children[6].textContent;
 
       editModal.style.display = 'flex';
     }
@@ -245,12 +256,12 @@
       evt.preventDefault();
       const id = Number(document.getElementById('editId').value);
       const body = {
-        loja:       document.getElementById('editLoja').value,
-        setor:      document.getElementById('editSetor').value,
-        tipo:       document.getElementById('editTipo').value,
-        numero:     document.getElementById('editNumero').value,
-        serie:      document.getElementById('editSerie').value,
-        patrimonio: document.getElementById('editPatrimonio').value
+        loja:       document.getElementById('loja').value,
+        setor:      document.getElementById('setor').value,
+        tipo:       document.getElementById('tipo').value,
+        numero:     document.getElementById('numero').value,
+        serie:      document.getElementById('serie').value,
+        patrimonio: document.getElementById('patrimonio').value
       };
 
       const res = await fetch(`/equipamentos/${id}`, {
