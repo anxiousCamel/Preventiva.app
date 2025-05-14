@@ -33,4 +33,18 @@ export const lojas = [
     { value: 'gaveta',           label: 'Gaveta' },
     { value: 'scanner',          label: 'Scanner' },
   ];
+
+  export const checklistBalanca = [
+    { idSuffix: "limparCabecote", labelText: "Limpar cabeçote" },
+    { idSuffix: "testeDeImpressao", labelText: "Teste de impressão" },
+    { idSuffix: "peso", labelText: "Peso da balança" },
+    { idSuffix: "teclado", labelText: "Teclado" },
+    { idSuffix: "display", labelText: "Display" },
+    { idSuffix: "nivelarBalanca", labelText: "Nivelar balança" },
+    { idSuffix: "cabos", labelText: "Cabos" },
+    { idSuffix: "retirarAdesivos", labelText: "Retirar adesivo e outros" },
+    { idSuffix: "tampas", labelText: "Tampas" },
+    { idSuffix: "limpezaBalanca", labelText: "Limpeza da balança" },
+  ];
+  
   

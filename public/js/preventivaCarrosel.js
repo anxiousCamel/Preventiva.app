@@ -8,19 +8,9 @@ import { createChecklistFieldset } from "./checklistFieldsetBuilder.js";
 
 const equipamentosData = localStorage.getItem("equipamentosData");
 const carouselContainer = document.getElementById("carouselContainer");
+import { checklistBalanca } from "./config.js";
 
-const CHECKLIST_OPTIONS = [
-  { idSuffix: "limparCabecote", labelText: "Limpar cabeçote" },
-  { idSuffix: "testeDeImpressao", labelText: "Teste de impressão" },
-  { idSuffix: "peso", labelText: "Peso da balança" },
-  { idSuffix: "teclado", labelText: "Teclado" },
-  { idSuffix: "display", labelText: "Display" },
-  { idSuffix: "nivelarBalanca", labelText: "Nivelar balança" },
-  { idSuffix: "cabos", labelText: "Cabos" },
-  { idSuffix: "retirarAdesivos", labelText: "Retirar adesivo e outros" },
-  { idSuffix: "tampas", labelText: "Tampas" },
-  { idSuffix: "limpezaBalanca", labelText: "Limpeza da balança" },
-];
+
 
 const equipamentos = equipamentosData ? parseEquipamentosData(equipamentosData) : null;
 
@@ -51,7 +41,7 @@ if (equipamentos) {
       <fieldset><legend>Fotos Antes</legend>
         <input type="file" id="fotoAntes_${sortedIdx}" name="fotoAntes" accept="image/*" capture="environment">
         <img id="previewFotoAntes_${sortedIdx}" alt="Prévia" style="max-width:100%; display:none; margin-top:10px;"></fieldset>
-      ${createChecklistFieldset(CHECKLIST_OPTIONS, sortedIdx).outerHTML}
+        ${createChecklistFieldset(checklistBalanca, sortedIdx).outerHTML}
       <fieldset><label for="current_${sortedIdx}">Corrente Elétrica:</label>
         <select id="current_${sortedIdx}" name="current" required>
           <option value="" disabled>Selecione a tensão</option>
