@@ -81,3 +81,12 @@ export function toggleAllCheckboxes(slideIndex) {
   checkboxes.forEach(cb => cb.checked = !allChecked);
   checkAllCheckbox.checked = !allChecked;
 }
+
+export function parseEquipamentosData(data) {
+  try {
+    return JSON.parse(data);
+  } catch (e) {
+    alert("Erro ao carregar os dados dos equipamentos.");
+    return null;
+  }
+}
