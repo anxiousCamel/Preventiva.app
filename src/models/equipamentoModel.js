@@ -118,21 +118,52 @@ export async function updateEquipamentoById(id, updatedFields) {
   await initDB();
   let updatedEquip = null;
 
+  // 1) Encontrar localização original
+  let origStore, origSector, origIndex;
   Object.entries(db.data.lojas).forEach(([storeKey, sectors]) => {
     Object.entries(sectors).forEach(([sectorKey, items]) => {
-      items.forEach((item, idx) => {
-        if (item.id === id) {
-          const merged = { ...item, ...updatedFields };
-          db.data.lojas[storeKey][sectorKey][idx] = merged;
-          updatedEquip = merged;
-        }
-      });
+      const idx = items.findIndex(item => item.id === id);
+      if (idx !== -1) {
+        origStore = storeKey;
+        origSector = sectorKey;
+        origIndex = idx;
+      }
     });
   });
 
-  if (updatedEquip) await db.write();
+  if (origStore == null) {
+    // não achou o equipamento
+    return null;
+  }
+
+  // 2) Remove do array original
+  const [item] = db.data.lojas[origStore][origSector].splice(origIndex, 1);
+
+  // 3) Atualiza os campos
+  const merged = { ...item, ...updatedFields };
+
+  // 4) Determina targetStore e targetSector
+  const newStore  = updatedFields.loja   ?? origStore;
+  const newSector = updatedFields.setor  ?? origSector;
+
+  // 5) Garante que exista o array destino
+  if (!db.data.lojas[newStore]) {
+    db.data.lojas[newStore] = {};
+  }
+  if (!db.data.lojas[newStore][newSector]) {
+    db.data.lojas[newStore][newSector] = [];
+  }
+
+  // 6) Insere no destino
+  db.data.lojas[newStore][newSector].push(merged);
+
+  // 7) Persiste
+  updatedEquip = merged;
+  await db.write();
+
   return updatedEquip;
 }
+
 
 
 export default {

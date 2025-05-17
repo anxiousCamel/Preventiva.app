@@ -11,29 +11,10 @@
   <form id="form">
     <label for="loja">Loja:</label>
     <select id="loja" required>
-      <option value="rebouças">Rebouças</option>
-      <option value="ivo">Ivo</option>
-      <option value="bom_retiro">Bom Retiro</option>
-      <option value="hortolandia">Hortolândia</option>
-      <option value="matao">Matão</option>
-      <option value="maria_antonia">Maria Antonia</option>
-      <option value="monte_mor">Monte Mor</option>
-      <option value="indaiatuba">Indaiatuba</option>
-      <option value="mogi_mirim">Mogi Mirim</option>
-      <option value="sousas">Sousas</option>
-      <option value="taquaral">Taquaral</option>
-      <option value="mogi_guacu">Mogi Guaçu</option>
-      <option value="bordon">Bordon</option>
     </select>
     
     <label for="setor">Setor:</label>
     <select id="setor" required>
-      <option value="Açougue">Açougue</option>
-      <option value="Padaria">Padaria</option>
-      <option value="Frios">Frios e Laticínios</option>
-      <option value="Hortifruti">Hortifruti</option>
-      <option value="Rotisseria">Rotisseria</option>
-      <option value="Peixaria">Peixaria</option>
     </select>
 
     <label for="tipo">Tipo de Equipamento:</label>
@@ -57,5 +38,11 @@
   <ul id="lista"></ul>
 
   <script src="js/cadastroEquipamento.js"></script>
+   <!--
+    1) config.js: contém as arrays de configuração (lojas, setores, tipos)
+    2) populate.js: função que lê config.js e injeta <option> nos <select> com base nos IDs
+  -->
+  <script type="module" src="js/config.js"></script>
+  <script type="module" src="js/populate.js"></script>
 </body>
 </html>
