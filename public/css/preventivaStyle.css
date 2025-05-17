@@ -91,11 +91,16 @@ img[alt="Prévia"] {
   display: block;               /* remove espaços em linha */
   width: 100%;                  /* ocupa toda largura do container */
   max-width: 600px;
-  height: auto;                 /* mantém proporção definida por width/height attributes */
   background-color: #fff;       /* fundo branco */
   border: 1px solid #ccc;
   box-sizing: border-box;       /* inclui borda no cálculo de largura */
+  height: 200px;
+  border: 1px solid #ccc;
+  margin: 1rem auto;
+  touch-action: none;
 }
+
+
 
 /* Botão que ocupa toda largura do canvas */
 .btn-clear-signature {
