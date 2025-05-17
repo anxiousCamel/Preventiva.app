@@ -1,9 +1,10 @@
+<!-- public/preventivaBalancaSetor -->
 <!DOCTYPE html>
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Preventiva - Carrossel de Balanças</title>
+    <title></title>
     <link rel="stylesheet" href="css/preventivaStyle.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
@@ -12,29 +13,7 @@
   </head>
 
   <body>
-    <!-- Gooey filter SVG -->
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      style="position: absolute; width: 0; height: 0; pointer-events: none"
-    >
-      <defs>
-        <filter id="goo">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
-          <feColorMatrix
-            in="blur"
-            mode="matrix"
-            values="1 0 0 0 0  
-                0 1 0 0 0  
-                0 0 1 0 0  
-                0 0 0 22 -7"
-            result="goo"
-          />
-          <feBlend in="SourceGraphic" in2="goo" />
-        </filter>
-      </defs>
-    </svg>
-
-    <h1>Preventiva - Carrossel de Balanças</h1>
+    <h1></h1>
 
     <label for="sectorFilter">Filtrar por setor:</label>
     <select id="sectorFilter">
@@ -61,6 +40,7 @@
     <script type="module" src="/js/preventivaCarrosel.js"></script>
     <script type="module" src="/js/stateRestorer.js"></script>
     <script type="module" src="js/storage.js"></script>
+    <script type="module" src="js/autoTitle.js"></script>
   </body>
 </html>
 

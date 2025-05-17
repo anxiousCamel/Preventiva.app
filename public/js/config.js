@@ -35,7 +35,8 @@ export const lojas = [
     { value: 'scanner',          label: 'Scanner' },
   ];
 
-  export const checklistBalanca = [
+  export const checklists = {
+  'balanca_setor': [
     { idSuffix: "limparCabecote", labelText: "Limpar cabeçote" },
     { idSuffix: "testeDeImpressao", labelText: "Teste de impressão" },
     { idSuffix: "peso", labelText: "Peso da balança" },
@@ -46,14 +47,25 @@ export const lojas = [
     { idSuffix: "retirarAdesivos", labelText: "Retirar adesivo e outros" },
     { idSuffix: "tampas", labelText: "Tampas" },
     { idSuffix: "limpezaBalanca", labelText: "Limpeza da balança" }
-  ];
-
-  export const checklistImpressora = [
+  ],
+  'balanca_checkout': [
+    // você pode reutilizar o mesmo da setor se quiser
+    { idSuffix: "peso", labelText: "Peso da balança" },
+    { idSuffix: "display", labelText: "Display" },
+    { idSuffix: "nivelarBalanca", labelText: "Nivelar balança" },
+    { idSuffix: "cabos", labelText: "Cabos" },
+    { idSuffix: "tampas", labelText: "Tampas" },
+    { idSuffix: "limpezaBalanca", labelText: "Limpeza da balança" }
+  ],
+  'impressora': [
     { idSuffix: "limparCabecote", labelText: "Limpeza cabeça de impressão" },
     { idSuffix: "testeDeImpressaoCheque", labelText: "Teste Fita de impressão cheque" },
     { idSuffix: "testeDeImpressaoCupom", labelText: "Teste impressão cupom" },
     { idSuffix: "ProteçãoLacre", labelText: "Proteção lacre com fita" },
     { idSuffix: "Higienizacao", labelText: "Higienização" }
-  ];
+  ]
+  // adicione outros tipos conforme necessário
+};
+
   
   

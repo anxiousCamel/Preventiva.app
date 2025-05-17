@@ -1,9 +1,12 @@
-// public/js/stateManager.js
 import { captureSignatures } from "./utils.js";
 import { setItem } from "./storage.js";
 
 export async function saveSlideState(form, idx) {
   if (!form) return;
+
+  // 📌 Recupera o tipo do equipamento do atributo data-tipo
+  const tipo = form.dataset.tipo || "desconhecido";
+  const key = `preventiva_state_${tipo}_${idx}`;
 
   const state = {
     text: {},
@@ -27,9 +30,12 @@ export async function saveSlideState(form, idx) {
 
   ["Antes", "Depois"].forEach((type) => {
     const img = document.getElementById(`previewFoto${type}_${idx}`);
-    if (img && img.src) state.images[`foto${type}_${idx}`] = img.src;
+    if (img && img.src) {
+      state.images[`foto${type}_${idx}`] = img.src;
+    }
   });
 
   state.signatures = captureSignatures(idx, ["Responsavel", "Ti"]);
-  await setItem(`preventiva_state_${idx}`, state);
+
+  await setItem(key, state);
 }
