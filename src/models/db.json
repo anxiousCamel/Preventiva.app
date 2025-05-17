@@ -165,7 +165,17 @@
           "loja": "maria_antonia"
         }
       ],
-      "Peixaria": []
+      "Peixaria": [],
+      "Checkout": [
+        {
+          "id": 1747508511237,
+          "setor": "Checkout",
+          "tipo": "impressora",
+          "numero": "201",
+          "serie": "---",
+          "patrimonio": "---"
+        }
+      ]
     },
     "mogi_guacu": {
       "Padaria": []

@@ -22,6 +22,7 @@ export const lojas = [
     { value: 'Hortifruti',      label: 'Hortifruti' },
     { value: 'Rotisseria',      label: 'Rotisseria' },
     { value: 'Peixaria',        label: 'Peixaria' },
+    { value: 'Checkout',        label: 'Frente de loja' },
   ];
   
   export const tipos = [
@@ -44,7 +45,15 @@ export const lojas = [
     { idSuffix: "cabos", labelText: "Cabos" },
     { idSuffix: "retirarAdesivos", labelText: "Retirar adesivo e outros" },
     { idSuffix: "tampas", labelText: "Tampas" },
-    { idSuffix: "limpezaBalanca", labelText: "Limpeza da balança" },
+    { idSuffix: "limpezaBalanca", labelText: "Limpeza da balança" }
+  ];
+
+  export const checklistImpressora = [
+    { idSuffix: "limparCabecote", labelText: "Limpeza cabeça de impressão" },
+    { idSuffix: "testeDeImpressaoCheque", labelText: "Teste Fita de impressão cheque" },
+    { idSuffix: "testeDeImpressaoCupom", labelText: "Teste impressão cupom" },
+    { idSuffix: "ProteçãoLacre", labelText: "Proteção lacre com fita" },
+    { idSuffix: "Higienizacao", labelText: "Higienização" }
   ];
   
   

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Preventiva - Impressoras</title>
+    <link rel="stylesheet" href="css/preventivaStyle.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <!-- Biblioteca pdf-lib (versão 1.17.1) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+  </head>
+
+  <body>
+    <h1>Preventiva - Impressoras</h1>
+
+    <label for="sectorFilter">Filtrar por setor:</label>
+    <select id="sectorFilter">
+      <option value="all">Todos os setores</option>
+    </select>
+
+    <!-- Container do carrossel -->
+    <div id="carouselContainer"></div>
+
+    <!-- Botão para gerar o PDF com todas as preventivas -->
+    <div style="padding: 15px">
+      <button class=".bttn-slant.bttn-lg" type="button" onclick="generateFilledPDF()">
+        <i class="fa-regular fa-file-pdf"></i> Gerar PDF com todas as Preventivas
+      </button>
+    </div>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+
+    <script src="js/signatureCanvas.js"></script>
+    <script src="js/pdfGenerator.Js"></script>
+    <script src="js/sectorFilter.js"></script>
+        
+    <script type="module" src="/js/preventivaCarrosel.js"></script>
+    <script type="module" src="/js/stateRestorer.js"></script>
+    <script type="module" src="js/storage.js"></script>
+  </body>
+</html>
+
