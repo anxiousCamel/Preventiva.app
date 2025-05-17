@@ -1,55 +1,98 @@
-//public/js/signatureCanvas.js
-// Função para habilitar a área de assinatura em um canvas
-function enableSignatureCanvas(canvas, index, tipo) {
+// public/js/signatureCanvas.js
+
+// Corrige resolução do canvas com base no devicePixelRatio
+function setupCanvasResolution(canvas) {
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+
+  // Aumenta resolução interna do canvas para evitar pixelização
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+
+  // Mantém o tamanho visual original
+  canvas.style.width = `${rect.width}px`;
+  canvas.style.height = `${rect.height}px`;
+
   const ctx = canvas.getContext("2d");
+  ctx.scale(dpr, dpr); // ajusta sistema de coordenadas para corresponder ao visual
+  return ctx;
+}
+
+// Habilita assinatura no canvas para um equipamento/preventiva
+function enableSignatureCanvas(canvas, index, tipo) {
+  const ctx = setupCanvasResolution(canvas);
+
+  // Configura traço suave
+  ctx.lineWidth = 1.8;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.strokeStyle = "#000";
+
   let drawing = false;
 
+  // Eventos de mouse
   canvas.addEventListener("mousedown", (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
     drawing = true;
     ctx.beginPath();
-    ctx.moveTo(e.offsetX, e.offsetY);
+    ctx.moveTo(x, y);
   });
 
   canvas.addEventListener("mousemove", (e) => {
     if (!drawing) return;
-    ctx.lineTo(e.offsetX, e.offsetY);
+
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    ctx.lineTo(x, y);
     ctx.stroke();
   });
 
   canvas.addEventListener("mouseup", () => (drawing = false));
   canvas.addEventListener("mouseout", () => (drawing = false));
 
+  // Eventos de toque (mobile)
   canvas.addEventListener("touchstart", (e) => {
     const rect = canvas.getBoundingClientRect();
     const touch = e.touches[0];
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+
     ctx.beginPath();
-    ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+    ctx.moveTo(x, y);
     drawing = true;
   });
 
   canvas.addEventListener("touchmove", (e) => {
-    e.preventDefault();
+    e.preventDefault(); // evita scroll ao desenhar
+    if (!drawing) return;
+
     const rect = canvas.getBoundingClientRect();
     const touch = e.touches[0];
-    if (!drawing) return;
-    ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+
+    ctx.lineTo(x, y);
     ctx.stroke();
-  });
+  }, { passive: false });
 
   canvas.addEventListener("touchend", () => (drawing = false));
 
-  // salvar assinatura ao submeter o formulário
+  // Salvar a assinatura no hidden input ao enviar formulário
   const form = document.getElementById(`preventiveForm_${index}`);
   if (form) {
     form.addEventListener("submit", () => {
       const dataURL = canvas.toDataURL();
-      document.getElementById(`assinaturaInput${tipo}_${index}`).value =
-        dataURL;
-    });
+      document.getElementById(`assinaturaInput${tipo}_${index}`).value = dataURL;
+    }, { once: true });
   }
 }
 
-// limpa o canvas e o hidden input correspondente
+// Limpa a assinatura e o campo oculto
 function clearSignature(role, index) {
   const canvasId = `signatureCanvas${role}_${index}`;
   const inputId = `assinaturaInput${role}_${index}`;
@@ -66,21 +109,17 @@ function clearSignature(role, index) {
   }
 }
 
-// Inicializa a função de assinatura para cada canvas de assinatura
+// Inicializa todos os canvases de assinatura na página
 window.addEventListener("load", () => {
-  // Seleciona todos os <canvas> cujo id começa com "signatureCanvas"
   document
     .querySelectorAll("canvas[id^='signatureCanvas']")
     .forEach((canvas) => {
-      // Usa regex para extrair o papel ("Responsavel" ou "Ti") e o índice do id
-      // Exemplo de id: "signatureCanvasResponsavel_16" ou "signatureCanvasTi_0"
       const match = canvas.id.match(/^signatureCanvas(Responsavel|Ti)_(\d+)$/);
-      if (!match) return; // pula qualquer canvas que não casou o padrão
+      if (!match) return;
 
       const role = match[1]; // "Responsavel" ou "Ti"
-      const index = Number(match[2]); // 0, 16, etc.
+      const index = Number(match[2]);
 
-      // Associa todos os eventos de mouse/touch ao canvas correto
       enableSignatureCanvas(canvas, index, role);
     });
 });
