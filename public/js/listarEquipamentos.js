@@ -21,12 +21,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // 🔄 Gera o mapeamento dinamicamente: preventiva + NomeComPrimeiraLetraMaiúscula
       const pageMapping = Object.fromEntries(
-  Object.keys(checklists).map(tipo => [
-    tipo,
-    `preventiva${toPascalCase(tipo)}.html`
-  ])
-);
-
+        Object.keys(checklists).map((tipo) => [
+          tipo,
+          `preventiva${toPascalCase(tipo)}.html`,
+        ])
+      );
 
       const targetPage = pageMapping[tipo];
       if (!targetPage) {
