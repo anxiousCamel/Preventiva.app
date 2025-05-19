@@ -1,5 +1,5 @@
 // public/js/listarEquipamentos.js
-import { checklists } from './config.js';
+import { checklists } from "./config.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("form").addEventListener("submit", async (event) => {
@@ -21,8 +21,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // 🔄 Gera o mapeamento dinamicamente: preventiva + NomeComPrimeiraLetraMaiúscula
       const pageMapping = Object.fromEntries(
-        tipos.map(t => [t.value, `preventiva${toPascalCase(t.value)}.html`])
-      );
+  Object.keys(checklists).map(tipo => [
+    tipo,
+    `preventiva${toPascalCase(tipo)}.html`
+  ])
+);
+
 
       const targetPage = pageMapping[tipo];
       if (!targetPage) {
@@ -44,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
  */
 function toPascalCase(str) {
   return str
-    .split('_')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join('');
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join("");
 }
