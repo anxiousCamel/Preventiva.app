@@ -1,18 +1,24 @@
 import {
-  debounce, fileToDataURL, previewImage, captureSignatures,
-  toggleAllCheckboxes, parseEquipamentosData
+  debounce,
+  fileToDataURL,
+  previewImage,
+  captureSignatures,
+  toggleAllCheckboxes,
+  parseEquipamentosData,
 } from "./utils.js";
 import { generateEquipmentFieldset } from "./equipmentFieldsetGenerator.js";
 import { generateChecklistHTML } from "./checklistGenerator.js";
 import { setItem } from "./storage.js";
 import { saveSlideState } from "./stateManager.js";
 import { createChecklistFieldset } from "./checklistFieldsetBuilder.js";
-import { checklists } from './config.js';
+import { checklists } from "./config.js";
 
 const equipamentosData = localStorage.getItem("equipamentosData");
 const carouselContainer = document.getElementById("carouselContainer");
 
-const equipamentos = equipamentosData ? parseEquipamentosData(equipamentosData) : null;
+const equipamentos = equipamentosData
+  ? parseEquipamentosData(equipamentosData)
+  : null;
 
 if (equipamentos) {
   const sortedIndices = equipamentos
@@ -40,7 +46,10 @@ if (equipamentos) {
     form.dataset.tipo = equipamento.tipo;
 
     const checklist = checklists[equipamento.tipo] || [];
-    const checklistHTML = createChecklistFieldset(checklist, sortedIdx).outerHTML;
+    const checklistHTML = createChecklistFieldset(
+      checklist,
+      sortedIdx
+    ).outerHTML;
 
     let html = `
       ${generateEquipmentFieldset(equipamento, sortedIdx)}
@@ -123,29 +132,41 @@ if (equipamentos) {
 
     const debouncedSave = debounce(() => saveSlideState(form, sortedIdx), 1000);
 
-    form.querySelectorAll('input[type="text"], select, textarea').forEach(el => {
-      el.addEventListener("input", debouncedSave);
-    });
+    form
+      .querySelectorAll('input[type="text"], select, textarea')
+      .forEach((el) => {
+        el.addEventListener("input", debouncedSave);
+      });
 
-    form.querySelectorAll('input[type="checkbox"]').forEach(el => {
+    form.querySelectorAll('input[type="checkbox"]').forEach((el) => {
       el.addEventListener("change", debouncedSave);
     });
 
-    form.querySelectorAll('input[type="file"]').forEach(input => {
+    form.querySelectorAll('input[type="file"]').forEach((input) => {
       input.addEventListener("change", async (e) => {
         const file = e.target.files[0];
         if (!file) return;
+
         const type = input.name === "fotoAntes" ? "Antes" : "Depois";
-        const preview = document.getElementById(`previewFoto${type}_${sortedIdx}`);
-        previewImage(e.target, preview);
-        await saveSlideState(form, sortedIdx);
+        const preview = document.getElementById(
+          `previewFoto${type}_${sortedIdx}`
+        );
+
+        try {
+          await previewImage(e.target, preview);
+          await saveSlideState(form, sortedIdx);
+        } catch (err) {
+          console.error("Erro ao carregar imagem:", err);
+        }
       });
     });
 
-    ["Responsavel", "Ti"].forEach(role => {
-      const canvas = document.getElementById(`signatureCanvas${role}_${sortedIdx}`);
+    ["Responsavel", "Ti"].forEach((role) => {
+      const canvas = document.getElementById(
+        `signatureCanvas${role}_${sortedIdx}`
+      );
       if (!canvas) return;
-      ["mouseup", "touchend"].forEach(evt => {
+      ["mouseup", "touchend"].forEach((evt) => {
         canvas.addEventListener(evt, () => saveSlideState(form, sortedIdx));
       });
     });
@@ -155,10 +176,12 @@ if (equipamentos) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll('input[type="checkbox"][id^="checkAll_"]').forEach((checkbox) => {
-    checkbox.addEventListener("click", (event) => {
-      const slideIndex = event.target.getAttribute("data-slide-index");
-      toggleAllCheckboxes(slideIndex);
+  document
+    .querySelectorAll('input[type="checkbox"][id^="checkAll_"]')
+    .forEach((checkbox) => {
+      checkbox.addEventListener("click", (event) => {
+        const slideIndex = event.target.getAttribute("data-slide-index");
+        toggleAllCheckboxes(slideIndex);
+      });
     });
-  });
 });

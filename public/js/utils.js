@@ -35,19 +35,24 @@ export function fileToDataURL(file) {
  * @param {HTMLImageElement} previewImg – elemento img para exibir a prévia
  */
 export function previewImage(fileInput, previewImg) {
-  const file = fileInput.files[0];
-  if (file) {
+  return new Promise((resolve, reject) => {
+    const file = fileInput.files[0];
+    if (!file) {
+      previewImg.style.display = "none";
+      return resolve();
+    }
+
     const reader = new FileReader();
     reader.onload = (e) => {
+      previewImg.onload = () => resolve(); // espera renderizar imagem
+      previewImg.onerror = () => reject(new Error("Erro ao carregar imagem"));
       previewImg.src = e.target.result;
       previewImg.style.display = "block";
     };
+    reader.onerror = reject;
     reader.readAsDataURL(file);
-  } else {
-    previewImg.style.display = "none";
-  }
+  });
 }
-
 
 /**
  * Captura as assinaturas do canvas e retorna um objeto role → dataURL.
@@ -77,8 +82,8 @@ export function toggleAllCheckboxes(slideIndex) {
   );
   const checkAllCheckbox = document.getElementById(`checkAll_${slideIndex}`);
 
-  const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-  checkboxes.forEach(cb => cb.checked = !allChecked);
+  const allChecked = Array.from(checkboxes).every((cb) => cb.checked);
+  checkboxes.forEach((cb) => (cb.checked = !allChecked));
   checkAllCheckbox.checked = !allChecked;
 }
 
