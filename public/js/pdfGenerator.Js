@@ -1,4 +1,16 @@
-//public/js/pdfGenerator.js
+// File: public/js/pdfGenerator.js
+
+/**
+ * @file pdfGenerator.js
+ * @description Gera PDF preenchido com dados e imagens (PNG ou JPEG), agrupando por setor. 
+ * Remove a primeira página (template) após o preenchimento.
+ * @requires pdf-lib
+ */
+
+// ========================
+// Funções utilitárias
+// ========================
+
 /**
  * Converte um File em string Base64
  * @param {File} file
@@ -14,15 +26,75 @@ function fileToBase64(file) {
 }
 
 /**
- * Gera o PDF preenchido agrupando preventivas por setor (até 2 por página).
- * Se o setor mudar, sempre inicia nova página.
+ * Verifica o MIME type de uma imagem base64.
+ * @param {string} base64 - A string base64 da imagem.
+ * @returns {string|null} - MIME type da imagem, ou null se não detectado.
  */
+function getImageMime(base64) {
+  const match = base64.match(/^data:(image\/\w+);base64,/);
+  return match ? match[1] : null;
+}
+
+/**
+ * Converte qualquer imagem base64 para PNG via <canvas>.
+ * @param {string} base64Input - Imagem em base64 com prefixo (data:image/...).
+ * @returns {Promise<string>} - Imagem convertida em base64 PNG.
+ */
+async function convertToPngBase64(base64Input) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.src = base64Input;
+
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      const result = canvas.toDataURL('image/png');
+      resolve(result);
+    };
+
+    img.onerror = (e) => reject(new Error("Falha ao carregar imagem: " + e.message));
+  });
+}
+
+/**
+ * Tenta embutir uma imagem no PDF, convertendo para PNG se necessário.
+ * @param {PDFDocument} pdfDoc
+ * @param {string} imageBase64
+ * @returns {Promise<PDFImage>}
+ */
+async function embedImageSmart(pdfDoc, imageBase64) {
+  try {
+    const mimeType = getImageMime(imageBase64);
+    const imageBytes = await fetch(imageBase64).then(res => res.arrayBuffer());
+
+    if (mimeType === 'image/png') {
+      return await pdfDoc.embedPng(imageBytes);
+    } else if (mimeType === 'image/jpeg' || mimeType === 'image/jpg') {
+      return await pdfDoc.embedJpg(imageBytes);
+    } else {
+      throw new Error('Formato de imagem não suportado');
+    }
+  } catch (err) {
+    console.warn("Erro ao embutir imagem, convertendo para PNG:", err.message);
+    const fallbackPng = await convertToPngBase64(imageBase64);
+    const fallbackBytes = await fetch(fallbackPng).then(res => res.arrayBuffer());
+    return await pdfDoc.embedPng(fallbackBytes);
+  }
+}
+
+// ========================
+// Geração do PDF
+// ========================
+
 async function generateFilledPDF() {
   const { PDFDocument, StandardFonts } = PDFLib;
 
-  // 1) Carrega template
   const templateUrl = "CHEK LIST PREVENTIVA BALANÇAS.pdf";
-  const templateBytes = await fetch(templateUrl).then((r) => r.arrayBuffer());
+  const templateBytes = await fetch(templateUrl).then(r => r.arrayBuffer());
   const pdfDoc = await PDFDocument.load(templateBytes);
   const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const helveticaBoldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
@@ -31,13 +103,11 @@ async function generateFilledPDF() {
   const perPage = 2;
   const deltaX = 355;
 
-  // Pages dinâmicas: começa com uma cópia da página template
-  let pages = [];
+  const pages = [];
   const [firstPage] = await pdfDoc.copyPages(pdfDoc, [0]);
   pdfDoc.addPage(firstPage);
   pages.push(firstPage);
 
-  // Helper: obtém retângulo de um campo (null se não existir)
   function getFieldRectangle(fieldName) {
     try {
       const field = form.getField(fieldName);
@@ -48,7 +118,6 @@ async function generateFilledPDF() {
     }
   }
 
-  // Desenha texto no slot da página
   function drawTextFieldDirect(page, fieldName, text, slotIndex) {
     if (!text) return;
     const rect = getFieldRectangle(fieldName);
@@ -62,7 +131,6 @@ async function generateFilledPDF() {
     });
   }
 
-  // Desenha 'X' para checkbox
   function drawCheckboxFieldDirect(page, fieldName, checked, slotIndex) {
     if (!checked) return;
     const rect = getFieldRectangle(fieldName);
@@ -76,28 +144,15 @@ async function generateFilledPDF() {
     });
   }
 
-  // Desenha imagem (antes/depois) no slot
-  async function drawImageSlot(
-    page,
-    fieldName,
-    base64WithPrefix,
-    defaultPos,
-    slotIndex
-  ) {
+  async function drawImageSlot(page, fieldName, base64WithPrefix, defaultPos, slotIndex) {
     if (!base64WithPrefix) return;
-    const [, data] = base64WithPrefix.split(",");
-    let embedded;
-    if (base64WithPrefix.includes("jpeg") || base64WithPrefix.includes("jpg")) {
-      embedded = await pdfDoc.embedJpg(data);
-    } else {
-      embedded = await pdfDoc.embedPng(data);
-    }
+    const image = await embedImageSmart(pdfDoc, base64WithPrefix);
 
     let pos = defaultPos;
     const rect = getFieldRectangle(fieldName);
     if (rect) pos = rect;
 
-    page.drawImage(embedded, {
+    page.drawImage(image, {
       x: pos.x + slotIndex * deltaX,
       y: pos.y,
       width: pos.width,
@@ -105,10 +160,9 @@ async function generateFilledPDF() {
     });
   }
 
-  // Desenha assinatura em PNG (setor ou TI)
   async function drawSignature(page, fieldName, base64Png, slotIndex) {
     if (!base64Png) return;
-    const image = await pdfDoc.embedPng(base64Png);
+    const image = await pdfDoc.embedPng("data:image/png;base64," + base64Png);
     const field = form.getField(fieldName);
     const widget = field.acroField.getWidgets()[0];
     const { x, y, width, height } = widget.getRectangle();
@@ -120,18 +174,13 @@ async function generateFilledPDF() {
     });
   }
 
-  // Recupera dados de hoje para preencher datas
   const today = new Date();
   const day = String(today.getDate()).padStart(2, "0");
   const month = String(today.getMonth() + 1).padStart(2, "0");
   const year = String(today.getFullYear());
 
-  // Coleta todos os formulários no DOM
-  const forms = Array.from(
-    document.querySelectorAll("form[id^='preventiveForm_']")
-  );
+  const forms = Array.from(document.querySelectorAll("form[id^='preventiveForm_']"));
 
-  // Agrupa índices por setor, mantendo ordem original
   const sectorGroups = {};
   forms.forEach((_, idx) => {
     const sector = document.getElementById(`setor_${idx}`)?.value || "";
@@ -139,11 +188,9 @@ async function generateFilledPDF() {
     sectorGroups[sector].push(idx);
   });
 
-  // Monta sequência de índices respeitando ordem de aparição
   const orderedIndices = [];
-  Object.values(sectorGroups).forEach((group) => orderedIndices.push(...group));
+  Object.values(sectorGroups).forEach(group => orderedIndices.push(...group));
 
-  // Variáveis de controle de página/slot
   let currentPageIndex = 0;
   let slotIndex = 0;
   let previousSector = null;
@@ -151,7 +198,6 @@ async function generateFilledPDF() {
   for (const idx of orderedIndices) {
     const sectorValue = document.getElementById(`setor_${idx}`)?.value || "";
 
-    // Se mudou de setor e slot atual não está vazio, inicia nova página
     if (sectorValue !== previousSector && slotIndex !== 0) {
       const [clone] = await pdfDoc.copyPages(pdfDoc, [0]);
       pdfDoc.addPage(clone);
@@ -160,7 +206,6 @@ async function generateFilledPDF() {
       slotIndex = 0;
     }
 
-    // Se slot cheio (>= perPage), inicia nova página
     if (slotIndex >= perPage) {
       const [clone] = await pdfDoc.copyPages(pdfDoc, [0]);
       pdfDoc.addPage(clone);
@@ -171,49 +216,21 @@ async function generateFilledPDF() {
 
     const page = pages[currentPageIndex];
 
-    // Valores textuais
-    const numberValue = document.getElementById(`numero_${idx}`)?.value || "";
-    const serialValue = document.getElementById(`serie_${idx}`)?.value || "";
-    const currentVoltage = document.getElementById(`current_${idx}`)?.value || "";
-    const patrimonyValue =
-      document.getElementById(`patrimonio_${idx}`)?.value || "";
-    const obsValue = document.getElementById(`observacoes_${idx}`)?.value || "";
-    const nameSectorValue =
-      document.getElementById(`nomeResponsavel_${idx}`)?.value || "";
-    const nameTiValue = document.getElementById(`nomeTi_${idx}`)?.value || "";
-    const roleValue =
-      document.getElementById(`cargoResponsavel_${idx}`)?.value || "";
-
-    // Desenha campos de texto
-    drawTextFieldDirect(page, "equipment_number", numberValue, slotIndex);
+    // Campos de texto
+    const get = (id) => document.getElementById(id)?.value || "";
+    drawTextFieldDirect(page, "equipment_number", get(`numero_${idx}`), slotIndex);
     drawTextFieldDirect(page, "equipment_sector", sectorValue, slotIndex);
-    drawTextFieldDirect(page, "equipment_serial", serialValue, slotIndex);
-    drawTextFieldDirect(page, "equipment_electricCurrent", currentVoltage, slotIndex);
-    drawTextFieldDirect(
-      page,
-      "equipment_patrimonio",
-      patrimonyValue,
-      slotIndex
-    );
-    drawTextFieldDirect(page, "equipment_obs", obsValue, slotIndex);
-    drawTextFieldDirect(page, "nameSector", nameSectorValue, slotIndex);
-    drawTextFieldDirect(page, "nameTi", nameTiValue, slotIndex);
-    drawTextFieldDirect(page, "cargoResponsavel", roleValue, slotIndex);
-    // Datas
-    [
-      "diaTi",
-      "mesTi",
-      "anoTi",
-      "diaResponsavel",
-      "mesResponsavel",
-      "anoResponsavel",
-    ].forEach((field) => {
-      const text = field.includes("dia")
-        ? day
-        : field.includes("mes")
-        ? month
-        : year;
-      drawTextFieldDirect(page, field, text, slotIndex);
+    drawTextFieldDirect(page, "equipment_serial", get(`serie_${idx}`), slotIndex);
+    drawTextFieldDirect(page, "equipment_electricCurrent", get(`current_${idx}`), slotIndex);
+    drawTextFieldDirect(page, "equipment_patrimonio", get(`patrimonio_${idx}`), slotIndex);
+    drawTextFieldDirect(page, "equipment_obs", get(`observacoes_${idx}`), slotIndex);
+    drawTextFieldDirect(page, "nameSector", get(`nomeResponsavel_${idx}`), slotIndex);
+    drawTextFieldDirect(page, "nameTi", get(`nomeTi_${idx}`), slotIndex);
+    drawTextFieldDirect(page, "cargoResponsavel", get(`cargoResponsavel_${idx}`), slotIndex);
+
+    ["diaTi", "mesTi", "anoTi", "diaResponsavel", "mesResponsavel", "anoResponsavel"].forEach((f) => {
+      const text = f.includes("dia") ? day : f.includes("mes") ? month : year;
+      drawTextFieldDirect(page, f, text, slotIndex);
     });
 
     // Checkboxes
@@ -230,71 +247,49 @@ async function generateFilledPDF() {
       "limpezaBalanca",
     ];
     checkboxes.forEach((name) => {
-      const checked = document.getElementById(
-        `${name.replace(/([A-Z])/g, (m) => m)}_${idx}`
-      )?.checked;
+      const id = `${name.replace(/([A-Z])/g, (m) => m)}_${idx}`;
+      const checked = document.getElementById(id)?.checked;
       drawCheckboxFieldDirect(page, `checkbox_${name}`, checked, slotIndex);
     });
 
-    // Imagens antes/depois
-    // Imagens antes/depois: pega o Data URL do <img> de preview (que vem do localStorage)
-    const previewAntes = document.getElementById(`previewFotoAntes_${idx}`);
-    const before64 = previewAntes && previewAntes.src ? previewAntes.src : null;
-
-    const previewDepois = document.getElementById(`previewFotoDepois_${idx}`);
-    const after64 =
-      previewDepois && previewDepois.src ? previewDepois.src : null;
-
-    // Desenha as imagens no PDF usando os Data URLs
-    await drawImageSlot(
-      page,
-      "before_cleaning",
-      before64,
-      { x: 50, y: 400, width: 200, height: 150 },
-      slotIndex
-    );
-
-    await drawImageSlot(
-      page,
-      "after_cleaning",
-      after64,
-      { x: 300, y: 400, width: 200, height: 150 },
-      slotIndex
-    );
+    // Imagens
+    const before64 = document.getElementById(`previewFotoAntes_${idx}`)?.src || null;
+    const after64 = document.getElementById(`previewFotoDepois_${idx}`)?.src || null;
+    await drawImageSlot(page, "before_cleaning", before64, { x: 50, y: 400, width: 200, height: 150 }, slotIndex);
+    await drawImageSlot(page, "after_cleaning", after64, { x: 300, y: 400, width: 200, height: 150 }, slotIndex);
 
     // Assinaturas
-    const canvasResp = document.getElementById(
-      `signatureCanvasResponsavel_${idx}`
-    );
+    const canvasResp = document.getElementById(`signatureCanvasResponsavel_${idx}`);
     const canvasTi = document.getElementById(`signatureCanvasTi_${idx}`);
-    const respData =
-      canvasResp && canvasResp.toDataURL() !== "data:,"
-        ? canvasResp.toDataURL().split(",")[1]
-        : null;
-    const tiData =
-      canvasTi && canvasTi.toDataURL() !== "data:,"
-        ? canvasTi.toDataURL().split(",")[1]
-        : null;
+    const respData = canvasResp && canvasResp.toDataURL() !== "data:," ? canvasResp.toDataURL().split(",")[1] : null;
+    const tiData = canvasTi && canvasTi.toDataURL() !== "data:," ? canvasTi.toDataURL().split(",")[1] : null;
     await drawSignature(page, "signatureSector", respData, slotIndex);
     await drawSignature(page, "signatureTi", tiData, slotIndex);
 
-    // Atualiza controles
     slotIndex += 1;
     previousSector = sectorValue;
   }
 
-  // Finaliza: fixa campos e dispara download
+  // Finaliza, salva e reabre para remover página inicial
   form.flatten();
-  const pdfBytes = await pdfDoc.save();
-  const blob = new Blob([pdfBytes], { type: "application/pdf" });
+  const finalBytesWithTemplate = await pdfDoc.save();
+  const cleanedPdfDoc = await PDFDocument.load(finalBytesWithTemplate);
+  cleanedPdfDoc.removePage(0);
+  const cleanedBytes = await cleanedPdfDoc.save();
+
+  const blob = new Blob([cleanedBytes], { type: "application/pdf" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
   a.download = "preventivas_preenchidas.pdf";
   a.click();
+
   clearSavedState();
 }
 
+/**
+ * Remove todos os dados de formulário salvos localmente.
+ */
 function clearSavedState() {
   document.querySelectorAll("form[id^='preventiveForm_']").forEach((form) => {
     const idx = form.id.split("_")[1];

@@ -98,14 +98,6 @@
       ],
       "Padaria": [
         {
-          "id": 1745663730198,
-          "setor": "Padaria",
-          "tipo": "balanca_setor",
-          "numero": "34",
-          "serie": "10744755",
-          "patrimonio": "1161"
-        },
-        {
           "id": 1745663744582,
           "setor": "Padaria",
           "tipo": "balanca_setor",
@@ -120,6 +112,15 @@
           "numero": "22",
           "serie": "10653253",
           "patrimonio": "9279"
+        },
+        {
+          "id": 1745663730198,
+          "setor": "Padaria",
+          "tipo": "balanca_setor",
+          "numero": "34",
+          "serie": "10744755",
+          "patrimonio": "1161",
+          "loja": "maria_antonia"
         }
       ],
       "Açougue": [
