@@ -36,11 +36,12 @@ function getImageMime(base64) {
 }
 
 /**
- * Converte qualquer imagem base64 para PNG via <canvas>.
+ * Converte qualquer imagem base64 para JPEG comprimido via <canvas>
  * @param {string} base64Input - Imagem em base64 com prefixo (data:image/...).
- * @returns {Promise<string>} - Imagem convertida em base64 PNG.
+ * @param {number} quality - Qualidade de compressão (0.6 = boa economia).
+ * @returns {Promise<string>} - Imagem convertida para base64 JPEG.
  */
-async function convertToPngBase64(base64Input) {
+async function convertToCompressedJpegBase64(base64Input, quality = 0.6) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = 'Anonymous';
@@ -48,11 +49,19 @@ async function convertToPngBase64(base64Input) {
 
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
+
+      // Reduz resolução se muito grande
+      const maxWidth = 1024;
+      const maxHeight = 768;
+      const ratio = Math.min(maxWidth / img.width, maxHeight / img.height, 1);
+
+      canvas.width = img.width * ratio;
+      canvas.height = img.height * ratio;
+
       const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0);
-      const result = canvas.toDataURL('image/png');
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      const result = canvas.toDataURL('image/jpeg', quality);
       resolve(result);
     };
 
@@ -60,31 +69,19 @@ async function convertToPngBase64(base64Input) {
   });
 }
 
+
 /**
- * Tenta embutir uma imagem no PDF, convertendo para PNG se necessário.
+ * Compacta e embute uma imagem como JPEG
  * @param {PDFDocument} pdfDoc
  * @param {string} imageBase64
  * @returns {Promise<PDFImage>}
  */
 async function embedImageSmart(pdfDoc, imageBase64) {
-  try {
-    const mimeType = getImageMime(imageBase64);
-    const imageBytes = await fetch(imageBase64).then(res => res.arrayBuffer());
-
-    if (mimeType === 'image/png') {
-      return await pdfDoc.embedPng(imageBytes);
-    } else if (mimeType === 'image/jpeg' || mimeType === 'image/jpg') {
-      return await pdfDoc.embedJpg(imageBytes);
-    } else {
-      throw new Error('Formato de imagem não suportado');
-    }
-  } catch (err) {
-    console.warn("Erro ao embutir imagem, convertendo para PNG:", err.message);
-    const fallbackPng = await convertToPngBase64(imageBase64);
-    const fallbackBytes = await fetch(fallbackPng).then(res => res.arrayBuffer());
-    return await pdfDoc.embedPng(fallbackBytes);
-  }
+  const compressedJpeg = await convertToCompressedJpegBase64(imageBase64, 0.6);
+  const jpegBytes = await fetch(compressedJpeg).then(res => res.arrayBuffer());
+  return await pdfDoc.embedJpg(jpegBytes);
 }
+
 
 // ========================
 // Geração do PDF
@@ -275,7 +272,10 @@ async function generateFilledPDF() {
   const finalBytesWithTemplate = await pdfDoc.save();
   const cleanedPdfDoc = await PDFDocument.load(finalBytesWithTemplate);
   cleanedPdfDoc.removePage(0);
-  const cleanedBytes = await cleanedPdfDoc.save();
+  const cleanedBytes = await cleanedPdfDoc.save({
+  useObjectStreams: true,
+  compress: true
+});
 
   const blob = new Blob([cleanedBytes], { type: "application/pdf" });
   const url = URL.createObjectURL(blob);
