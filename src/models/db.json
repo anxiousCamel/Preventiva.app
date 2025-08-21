@@ -11,12 +11,12 @@
           "patrimonio": "4882"
         },
         {
-          "id": 1745663615812,
+          "id": 1754067933717,
           "setor": "Rotisseria",
           "tipo": "balanca_setor",
-          "numero": "65",
-          "serie": "002050",
-          "patrimonio": "21631"
+          "numero": "01",
+          "serie": "--",
+          "patrimonio": "--"
         }
       ],
       "Frios": [
@@ -80,20 +80,21 @@
           "patrimonio": "4794"
         },
         {
-          "id": 1745663826670,
-          "setor": "Hortifruti",
-          "tipo": "balanca_setor",
-          "numero": "43",
-          "serie": "10653251",
-          "patrimonio": "4881"
-        },
-        {
           "id": 1745663840118,
           "setor": "Hortifruti",
           "tipo": "balanca_setor",
           "numero": "16",
           "serie": "10740032",
           "patrimonio": "6883"
+        },
+        {
+          "id": 1745663615812,
+          "setor": "Hortifruti",
+          "tipo": "balanca_setor",
+          "numero": "65",
+          "serie": "002050",
+          "patrimonio": "21631",
+          "loja": "maria_antonia"
         }
       ],
       "Padaria": [
@@ -163,6 +164,15 @@
           "numero": "21",
           "serie": "10653253",
           "patrimonio": "----",
+          "loja": "maria_antonia"
+        },
+        {
+          "id": 1745663826670,
+          "setor": "Açougue",
+          "tipo": "balanca_setor",
+          "numero": "43",
+          "serie": "10653251",
+          "patrimonio": "4881",
           "loja": "maria_antonia"
         }
       ],

@@ -64,23 +64,19 @@ async function getAllEquipamentos() {
 }
 
 
+// src/models/equipamentoModel.js  (ou ssrc/... mas PADRONIZE p/ src/)
 async function getEquipamentosPorLojaETipo(loja, tipo) {
   await initDB();
+  if (!db.data.lojas[loja]) return [];
 
-  if (!db.data.lojas[loja]) {
-    return [];
-  }
-
-  let equipamentosEncontrados = [];
-
-  Object.values(db.data.lojas[loja]).forEach(setor => {
-    setor.forEach(equipamento => {
-      if (equipamento.tipo === tipo) {
-        equipamentosEncontrados.push(equipamento);
+  const equipamentosEncontrados = [];
+  Object.entries(db.data.lojas[loja]).forEach(([setorKey, arr]) => {
+    (arr || []).forEach((equip) => {
+      if (equip?.tipo === tipo) {
+        equipamentosEncontrados.push({ ...equip, loja, setor: setorKey });
       }
     });
   });
-
   return equipamentosEncontrados;
 }
 
@@ -164,12 +160,27 @@ export async function updateEquipamentoById(id, updatedFields) {
   return updatedEquip;
 }
 
+async function getEquipamentosPorLojaETipoAgrupado(loja, tipo) {
+  await initDB();
+  if (!db.data.lojas[loja]) return {};
 
+  const agrupado = {};
+  Object.entries(db.data.lojas[loja]).forEach(([setorKey, arr]) => {
+    (arr || []).forEach((equip) => {
+      if (equip?.tipo === tipo) {
+        const label = equip.setor ?? setorKey ?? "SemSetor";
+        (agrupado[label] ??= []).push({ ...equip, loja, setor: label });
+      }
+    });
+  });
+  return agrupado;
+}
 
 export default {
   addEquipamento,
   getAllEquipamentos,
   getEquipamentosPorLojaETipo,
+  getEquipamentosPorLojaETipoAgrupado,
   removeEquipamentoById,
   updateEquipamentoById
 };

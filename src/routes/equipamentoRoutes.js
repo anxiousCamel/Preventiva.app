@@ -1,24 +1,28 @@
-import express from 'express';
+/** @file src/routes/equipamentos.routes.js
+ * Rotas REST para equipamentos.
+ * - GET /equipamentos?loja=&tipo=&setor=&groupBy=setor
+ * - GET /equipamentos/:loja/:tipo[?groupBy=setor]
+ */
+
+import express from "express";
 import {
-  filterEquipments,   // novo controlador para filtros genéricos
-  cadastrarEquipamento,
-  listarEquipamentosPorLojaETipo,
-  deleteEquipment, 
-  editEquipment     
-} from '../controllers/equipamentoController.js';
+  filterEquipments,             // GET /equipamentos
+  cadastrarEquipamento,         // POST /equipamentos
+  listarEquipamentosPorLojaETipo, // GET /equipamentos/:loja/:tipo
+  deleteEquipment,              // DELETE /equipamentos/:id
+  editEquipment                 // PUT /equipamentos/:id
+} from "../controllers/equipamentoController.js";
 
 const router = express.Router();
 
-// Rota geral de listagem/filtros: GET /equipamentos?loja=&tipo=&setor=
-router.get('/', filterEquipments);
+/** Rota nova e genérica com filtros via querystring. */
+router.get("/", filterEquipments);
 
-// Rotas legadas
-router.get('/:loja/:tipo', listarEquipamentosPorLojaETipo);
-router.post('/', cadastrarEquipamento);
+/** Rotas legadas: mantém compatibilidade, mas já aceitam ?groupBy=setor */
+router.get("/:loja/:tipo", listarEquipamentosPorLojaETipo);
 
-// NOVAS rotas para delete e edit
-router.delete('/:id', deleteEquipment);
-router.put('/:id',    editEquipment);
-
+router.post("/", cadastrarEquipamento);
+router.delete("/:id", deleteEquipment);
+router.put("/:id",    editEquipment);
 
 export default router;

@@ -1,7 +1,64 @@
 // src/controllers/equipamentoController.js
 import EquipamentoModel from "../models/equipamentoModel.js";
-import db from "../models/db.json" assert { type: "json" };
 
+/** =========================
+ *  Utils internas (1 coisa por função)
+ * ========================= */
+
+/** Normaliza rótulos de setor para comparação estável (slug). */
+function toSectorSlug(s) {
+  return (s || "")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, "-");
+}
+
+/** Clona um equipamento e injeta loja/setor sem mutar o db. */
+function cloneWithStoreAndSector(item, loja, setor) {
+  return { ...item, loja, setor };
+}
+
+/** Achata toda a estrutura {loja:{setor:[...]}} em array plano. */
+function buildFlatFromAllStores(allStores) {
+  const out = [];
+  Object.entries(allStores || {}).forEach(([lojaKey, setoresObj]) => {
+    Object.entries(setoresObj || {}).forEach(([setorKey, arr]) => {
+      (arr || []).forEach((it) => out.push(cloneWithStoreAndSector(it, lojaKey, setorKey)));
+    });
+  });
+  return out;
+}
+
+/** Agrupa um array plano por setor (rótulo preservado). */
+function groupBySector(flat) {
+  const grouped = {};
+  for (const e of flat) {
+    const label = e.setor || "SemSetor";
+    (grouped[label] ??= []).push(e);
+  }
+  return grouped;
+}
+
+/** Cache TTL simples em memória. */
+const cache = new Map(); // key => {expires, data}
+const DEFAULT_TTL_MS = 30_000;
+const makeKey = (base, params) => `${base}:${JSON.stringify(params)}`;
+const cacheGet = (k) => {
+  const hit = cache.get(k);
+  if (!hit) return null;
+  if (Date.now() > hit.expires) { cache.delete(k); return null; }
+  return hit.data;
+};
+const cacheSet = (k, data, ttl = DEFAULT_TTL_MS) => cache.set(k, { expires: Date.now() + ttl, data });
+
+/** =========================
+ *  Controllers
+ * ========================= */
+
+/**
+ * @function listarEquipamentos
+ * @description Retorna todos os equipamentos (sem filtros).
+ */
 export const listarEquipamentos = async (req, res) => {
   try {
     const equipamentos = await EquipamentoModel.getAllEquipamentos();
@@ -12,19 +69,25 @@ export const listarEquipamentos = async (req, res) => {
   }
 };
 
+/**
+ * @function cadastrarEquipamento
+ * @description Cadastra um novo equipamento.
+ */
 export const cadastrarEquipamento = async (req, res) => {
   try {
     const { loja, setor, tipo, numero, serie, patrimonio } = req.body;
 
-    // Validação para garantir que todos os campos sejam fornecidos
     if (!loja || !setor || !tipo || !numero || !serie || !patrimonio) {
       return res.status(400).json({ error: "Preencha todos os campos!" });
     }
 
-    // Adiciona o novo equipamento
-    const novoEquipamento = await EquipamentoModel.addEquipamento(loja, setor, tipo, numero, serie, patrimonio);
+    const novoEquipamento = await EquipamentoModel.addEquipamento(
+      loja, setor, tipo, numero, serie, patrimonio
+    );
 
-    // Retorna uma resposta positiva
+    // limpa cache grosseiramente
+    cache.clear();
+
     res.status(201).json({ message: "Equipamento cadastrado com sucesso!", equipamento: novoEquipamento });
   } catch (error) {
     console.error("Erro ao cadastrar equipamento:", error);
@@ -32,69 +95,95 @@ export const cadastrarEquipamento = async (req, res) => {
   }
 };
 
+/**
+ * @function listarEquipamentosPorLojaETipo
+ * @description GET /equipamentos/:loja/:tipo[?groupBy=setor&setor=...]
+ * - Por padrão retorna FLAT (array).
+ * - Se groupBy=setor, retorna objeto agrupado por rótulo de setor.
+ * - Filtro setor aceita label ou slug.
+ */
 export const listarEquipamentosPorLojaETipo = async (req, res) => {
   try {
     const { loja, tipo } = req.params;
+    const { groupBy = "", setor = "" } = req.query;
 
-    // Verifica se a loja existe
-    if (!db.lojas[loja]) {
-      return res.status(404).json({ error: "Loja não encontrada!" });
+    // cache
+    const cacheKey = makeKey("LEGACY_LIST", { loja, tipo, groupBy, setor });
+    const cached = cacheGet(cacheKey);
+    if (cached) return res.json(cached);
+
+    if (groupBy.toLowerCase() === "setor") {
+      // AGRUPADO NO MODEL
+      const grouped = await EquipamentoModel.getEquipamentosPorLojaETipoAgrupado(loja, tipo);
+
+      // filtro opcional por setor (aceita label ou slug)
+      if (setor) {
+        const qSlug = toSectorSlug(setor);
+        const only = {};
+        for (const [label, arr] of Object.entries(grouped)) {
+          if (label === setor || toSectorSlug(label) === qSlug) only[label] = arr;
+        }
+        cacheSet(cacheKey, only);
+        return res.json(only);
+      }
+
+      cacheSet(cacheKey, grouped);
+      return res.json(grouped);
     }
 
-    let equipamentosEncontrados = [];
+    // FLAT (já com setor/loja vindos do model — ver item 2 do model)
+    let flat = await EquipamentoModel.getEquipamentosPorLojaETipo(loja, tipo);
 
-    // Usa Object.entries para iterar com a chave do setor
-    Object.entries(db.lojas[loja]).forEach(([setorKey, equipamentosArray]) => {
-      equipamentosArray.forEach(equipamento => {
-        if (equipamento.tipo === tipo) {
-          // Garante que o equipamento tenha o campo "setor" preenchido
-          equipamento.setor = setorKey;
-          equipamentosEncontrados.push(equipamento);
-        }
-      });
-    });
+    // filtro opcional por setor (aceita label/slug)
+    if (setor) {
+      const qSlug = toSectorSlug(setor);
+      flat = flat.filter(e => e.setor === setor || toSectorSlug(e.setor) === qSlug);
+    }
 
-    console.log("Equipamentos encontrados:", equipamentosEncontrados);
-    res.json(equipamentosEncontrados);
+    cacheSet(cacheKey, flat);
+    return res.json(flat);
   } catch (error) {
     console.error("Erro ao listar equipamentos:", error);
     res.status(500).json({ error: "Erro interno no servidor" });
   }
 };
 
+
+/**
+ * @function filterEquipments
+ * @description GET /equipamentos?loja=&tipo=&setor=&groupBy=setor
+ * - Busca todas as lojas via model, achata e filtra.
+ * - Se groupBy=setor, retorna agrupado.
+ */
 export const filterEquipments = async (req, res) => {
   try {
-    const { loja, tipo, setor } = req.query;
+    const loja   = String(req.query.loja || "").trim();
+    const tipo   = String(req.query.tipo || "").trim();
+    const setorQ = String(req.query.setor || "").trim();
+    const groupBy = String(req.query.groupBy || "").trim();
 
-    // Busca todos os equipamentos de todas as lojas
-    const allStores = await EquipamentoModel.getAllEquipamentos();
-    let equipments = [];
+    const cacheKey = makeKey("FILTER", { loja, tipo, setorQ, groupBy });
+    const cached = cacheGet(cacheKey);
+    if (cached) return res.json(cached);
 
-    // Converte objeto { loja: { setor: [...] } } em array plano de equipamentos
-    Object.entries(allStores).forEach(([storeKey, sectorsObj]) => {
-      Object.entries(sectorsObj).forEach(([sectorKey, items]) => {
-        items.forEach(item => {
-          equipments.push({
-            ...item,
-            loja: storeKey,
-            setor: sectorKey
-          });
-        });
-      });
-    });
+    const allStores = await EquipamentoModel.getAllEquipamentos(); // { loja: { setor: [...] } }
+    let flat = buildFlatFromAllStores(allStores);
 
-    // Aplica filtros somente se vierem preenchidos
-    if (loja) {
-      equipments = equipments.filter(e => e.loja === loja);
-    }
-    if (tipo) {
-      equipments = equipments.filter(e => e.tipo === tipo);
-    }
-    if (setor) {
-      equipments = equipments.filter(e => e.setor === setor);
+    if (loja) flat = flat.filter((e) => e.loja === loja);
+    if (tipo) flat = flat.filter((e) => e.tipo === tipo);
+    if (setorQ) {
+      const qSlug = toSectorSlug(setorQ);
+      flat = flat.filter((e) => e.setor === setorQ || toSectorSlug(e.setor) === qSlug);
     }
 
-    return res.json(equipments);
+    if (groupBy.toLowerCase() === "setor") {
+      const grouped = groupBySector(flat);
+      cacheSet(cacheKey, grouped);
+      return res.json(grouped);
+    }
+
+    cacheSet(cacheKey, flat);
+    return res.json(flat);
   } catch (error) {
     console.error("Error filtering equipments:", error);
     return res.status(500).json({ error: "Erro interno no servidor" });
@@ -102,12 +191,14 @@ export const filterEquipments = async (req, res) => {
 };
 
 /**
- * Deleta um equipamento pelo ID
+ * @function deleteEquipment
+ * @description DELETE /equipamentos/:id
  */
 export const deleteEquipment = async (req, res) => {
   try {
     const id = Number(req.params.id);
     const success = await EquipamentoModel.removeEquipamentoById(id);
+    cache.clear();
     if (!success) {
       return res.status(404).json({ error: "Equipamento não encontrado." });
     }
@@ -119,7 +210,8 @@ export const deleteEquipment = async (req, res) => {
 };
 
 /**
- * Edita (atualiza) um equipamento existente pelo ID
+ * @function editEquipment
+ * @description PUT /equipamentos/:id
  */
 export const editEquipment = async (req, res) => {
   try {
@@ -127,6 +219,7 @@ export const editEquipment = async (req, res) => {
     const { loja, setor, tipo, numero, serie, patrimonio } = req.body;
     const updatedFields = { loja, setor, tipo, numero, serie, patrimonio };
     const updated = await EquipamentoModel.updateEquipamentoById(id, updatedFields);
+    cache.clear();
     if (!updated) {
       return res.status(404).json({ error: "Equipamento não encontrado." });
     }

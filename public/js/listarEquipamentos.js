@@ -9,17 +9,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const tipo = document.getElementById("tipo").value;
 
     try {
-      const response = await fetch(`/equipamentos/${loja}/${tipo}`);
-      const equipamentos = await response.json();
-
-      if (!Array.isArray(equipamentos) || equipamentos.length === 0) {
+      const response = await fetch(`/equipamentos/${loja}/${tipo}?groupBy=setor`);
+      const equipamentosBySector = await response.json();
+      if (
+        !equipamentosBySector ||
+        (Array.isArray(equipamentosBySector) && equipamentosBySector.length === 0) ||
+        (typeof equipamentosBySector === "object" && Object.keys(equipamentosBySector).length === 0)
+      ) {
         alert("Nenhum equipamento encontrado!");
         return;
       }
-
-      localStorage.setItem("equipamentosData", JSON.stringify(equipamentos));
-
-      // 🔄 Gera o mapeamento dinamicamente: preventiva + NomeComPrimeiraLetraMaiúscula
+      // cache com chave clara
+      const cacheKey = `equipamentosData:${loja}:${tipo}:groupBySetor`;
+      localStorage.setItem(cacheKey, JSON.stringify(equipamentosBySector));
+      // Gera o mapeamento dinamicamente: preventiva  NomeComPrimeiraLetraMaiúscula
       const pageMapping = Object.fromEntries(
         Object.keys(checklists).map((tipo) => [
           tipo,
@@ -33,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      window.location.href = targetPage;
+      window.location.href = `${targetPage}?cacheKey=${encodeURIComponent(cacheKey)}`;
     } catch (error) {
       console.error("Erro ao buscar equipamentos:", error);
       alert("Erro ao carregar os equipamentos.");
